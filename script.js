@@ -38,16 +38,15 @@ let playlists = [];
 let activePlaylistIndex = -1;
 let playlistCounter = 0;
 
+// Mevcut seçili kanalı takip etmek için
+let currentSelectedChannelIndex = -1;
+
 // localStorage anahtarları
 const STORAGE_KEYS = {
     PLAYLISTS: 'onlinetv_playlists',
-    ACTIVE_PLAYLIST_INDEX: 'onlinetv_active_playlist_index',
-    PLAYLIST_COUNTER: 'onlinetv_playlist_counter',
-    PLAYLIST_VISIBLE: 'onlinetv_playlist_visible',
-    VOLUME: 'onlinetv_volume',
-    LAST_PLAYED_URL: 'onlinetv_last_played_url',
-    LAST_SELECTED_CHANNEL: 'onlinetv_last_selected_channel',
-    USER_PREFERENCES: 'onlinetv_user_preferences'
+    ACTIVE_PLAYLIST: 'onlinetv_active_playlist',
+    LAST_CHANNEL: 'onlinetv_last_channel',
+    PLAYLIST_COUNTER: 'onlinetv_playlist_counter'
 };
 
 // localStorage yardımcı fonksiyonları
@@ -69,135 +68,209 @@ function loadFromLocalStorage(key, defaultValue = null) {
     }
 }
 
-// Tüm verileri localStorage'e kaydet
-function saveAllDataToLocalStorage() {
+// Playlist verilerini localStorage'e kaydet
+function savePlaylistsToStorage() {
     saveToLocalStorage(STORAGE_KEYS.PLAYLISTS, playlists);
-    saveToLocalStorage(STORAGE_KEYS.ACTIVE_PLAYLIST_INDEX, activePlaylistIndex);
+    saveToLocalStorage(STORAGE_KEYS.ACTIVE_PLAYLIST, activePlaylistIndex);
     saveToLocalStorage(STORAGE_KEYS.PLAYLIST_COUNTER, playlistCounter);
-    saveToLocalStorage(STORAGE_KEYS.PLAYLIST_VISIBLE, body.classList.contains('playlist-visible'));
-
-    if (player) {
-        saveToLocalStorage(STORAGE_KEYS.VOLUME, player.volume());
-        saveToLocalStorage(STORAGE_KEYS.LAST_PLAYED_URL, player.currentSrc());
-    }
-
-    // Son seçili kanalı kaydet
-    saveLastSelectedChannel();
 }
 
-// Son seçili kanalı kaydet
+// En son seçili kanalı kaydet
 function saveLastSelectedChannel() {
     const selectedItem = playlistElement.querySelector('li.selected');
     if (selectedItem && activePlaylistIndex >= 0) {
-        const channelData = {
+        const channelNameSpan = selectedItem.querySelector('.channel-name');
+        const channelName = channelNameSpan ? channelNameSpan.textContent : selectedItem.textContent;
+
+        const lastChannel = {
             playlistIndex: activePlaylistIndex,
             channelUrl: selectedItem.dataset.url,
-            channelName: selectedItem.textContent.trim()
+            channelName: channelName
         };
-        saveToLocalStorage(STORAGE_KEYS.LAST_SELECTED_CHANNEL, channelData);
+        saveToLocalStorage(STORAGE_KEYS.LAST_CHANNEL, lastChannel);
     }
 }
 
-// localStorage'den tüm verileri yükle
-function loadAllDataFromLocalStorage() {
-    // Playlist verilerini yükle
+// localStorage'den playlist verilerini yükle
+function loadPlaylistsFromStorage() {
     const savedPlaylists = loadFromLocalStorage(STORAGE_KEYS.PLAYLISTS, []);
-    const savedActiveIndex = loadFromLocalStorage(STORAGE_KEYS.ACTIVE_PLAYLIST_INDEX, -1);
+    const savedActiveIndex = loadFromLocalStorage(STORAGE_KEYS.ACTIVE_PLAYLIST, -1);
     const savedCounter = loadFromLocalStorage(STORAGE_KEYS.PLAYLIST_COUNTER, 0);
-    const savedPlaylistVisible = loadFromLocalStorage(STORAGE_KEYS.PLAYLIST_VISIBLE, true);
-    const savedVolume = loadFromLocalStorage(STORAGE_KEYS.VOLUME, 1.0);
-    const savedLastPlayedUrl = loadFromLocalStorage(STORAGE_KEYS.LAST_PLAYED_URL, null);
-    const savedLastSelectedChannel = loadFromLocalStorage(STORAGE_KEYS.LAST_SELECTED_CHANNEL, null);
 
-    // Verileri uygula
-    playlists = savedPlaylists;
-    activePlaylistIndex = savedActiveIndex;
-    playlistCounter = savedCounter;
+    if (savedPlaylists.length > 0) {
+        playlists = savedPlaylists;
+        activePlaylistIndex = savedActiveIndex;
+        playlistCounter = savedCounter;
 
-    // Playlist görünürlüğünü ayarla
-    if (savedPlaylistVisible) {
-        body.classList.add('playlist-visible');
-    } else {
-        body.classList.remove('playlist-visible');
-    }
+        // Playlist selector'ı güncelle
+        updatePlaylistSelector();
 
-    // Video oynatıcı ayarlarını uygula
-    if (player) {
-        player.volume(savedVolume);
-
-        // Son oynatılan URL'yi yükle (eğer varsa)
-        if (savedLastPlayedUrl && savedLastPlayedUrl !== '') {
-            player.src({
-                src: savedLastPlayedUrl,
-                type: getMimeType(savedLastPlayedUrl, getFileExtension(savedLastPlayedUrl))
-            });
+        // Aktif playlist'i göster
+        if (activePlaylistIndex >= 0 && activePlaylistIndex < playlists.length) {
+            switchToPlaylist(activePlaylistIndex);
         }
+
+        return true; // Veriler yüklendi
     }
 
-    // Playlist selector'ı güncelle
-    updatePlaylistSelector();
-
-    // Aktif playlist'i göster ve son seçili kanalı geri yükle
-    if (activePlaylistIndex >= 0 && activePlaylistIndex < playlists.length) {
-        displayChannels(playlists[activePlaylistIndex].channels);
-        playlistSelector.value = playlists[activePlaylistIndex].id;
-
-        // Son seçili kanalı geri yükle
-        restoreLastSelectedChannel(savedLastSelectedChannel);
-    }
-
-    updatePlaylistActionButtons();
+    return false; // Veri yok
 }
 
-// Son seçili kanalı geri yükle
-function restoreLastSelectedChannel(savedChannelData) {
-    if (!savedChannelData || activePlaylistIndex !== savedChannelData.playlistIndex) {
-        return;
-    }
+// En son seçili kanalı geri yükle
+function restoreLastSelectedChannel() {
+    const lastChannel = loadFromLocalStorage(STORAGE_KEYS.LAST_CHANNEL);
 
-    // Kaydedilen kanal URL'sine göre kanalı bul ve seç
-    const channelItems = playlistElement.querySelectorAll('li[data-url]');
-    for (const item of channelItems) {
-        if (item.dataset.url === savedChannelData.channelUrl) {
+    if (lastChannel && lastChannel.playlistIndex === activePlaylistIndex) {
+        // Doğru playlist aktifse, son kanalı seç
+        const channelItem = allChannelItems.find(item => item.dataset.url === lastChannel.channelUrl);
+        if (channelItem) {
             // Önceki seçimi temizle
             const previouslySelected = playlistElement.querySelector('li.selected');
             if (previouslySelected) {
                 previouslySelected.classList.remove('selected');
             }
 
-            // Yeni seçimi uygula
-            item.classList.add('selected');
+            // Son kanalı seç ve oynat
+            channelItem.classList.add('selected');
+            playChannel(lastChannel.channelUrl, false);
 
-            // Video oynatıcısını güncelle (ama otomatik oynatma)
-            playChannel(savedChannelData.channelUrl, false);
+            // Mevcut seçili kanal indeksini güncelle
+            if (activePlaylistIndex >= 0 && playlists[activePlaylistIndex]) {
+                const currentChannels = playlists[activePlaylistIndex].channels;
+                currentSelectedChannelIndex = currentChannels.findIndex(channel => channel.url === lastChannel.channelUrl);
+            }
 
-            // Seçili öğeye scroll yap
-            item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Kanala scroll yap
+            channelItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            console.log('Son seçili kanal geri yüklendi:', savedChannelData.channelName);
-            break;
+            console.log('Son seçili kanal geri yüklendi:', lastChannel.channelName);
         }
     }
 }
 
+// Kanalı playlist'ten sil
+function removeChannelFromPlaylist(channelUrl) {
+    if (activePlaylistIndex === -1 || !playlists[activePlaylistIndex]) return;
+
+    const playlist = playlists[activePlaylistIndex];
+    const channelIndex = playlist.channels.findIndex(channel => channel.url === channelUrl);
+
+    if (channelIndex !== -1) {
+        // Kanalı playlist'ten kaldır
+        playlist.channels.splice(channelIndex, 1);
+
+        // Kanal listesini yeniden göster
+        displayChannels(playlist.channels);
+
+        // localStorage'e kaydet
+        savePlaylistsToStorage();
+
+        console.log('Kanal playlist\'ten silindi:', channelUrl);
+    }
+}
+
+// Kanal ismini değiştir
+function renameChannel(channelUrl, newName) {
+    if (activePlaylistIndex === -1 || !playlists[activePlaylistIndex]) return;
+
+    const playlist = playlists[activePlaylistIndex];
+    const channel = playlist.channels.find(ch => ch.url === channelUrl);
+
+    if (channel) {
+        channel.name = newName;
+
+        // Kanal listesini yeniden göster
+        displayChannels(playlist.channels);
+
+        // localStorage'e kaydet
+        savePlaylistsToStorage();
+
+        console.log('Kanal ismi değiştirildi:', newName);
+    }
+}
+
+// Kanal ismi düzenleme modu
+function enableChannelNameEdit(listItem, channelNameSpan) {
+    const currentName = channelNameSpan.textContent;
+    const channelUrl = listItem.dataset.url;
+
+    // Input elementi oluştur
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentName;
+    input.style.width = 'calc(100% - 70px)'; // Butonlar için daha fazla yer bırak
+    input.style.maxWidth = '150px'; // Maksimum genişlik sınırı
+    input.style.background = 'rgba(255, 255, 255, 0.1)';
+    input.style.border = '1px solid #4a9eff';
+    input.style.borderRadius = '3px';
+    input.style.color = 'inherit';
+    input.style.padding = '2px 4px'; // Daha dar padding
+    input.style.fontSize = '0.8rem'; // Daha küçük font
+    input.style.outline = 'none';
+    input.style.height = '20px'; // Sabit yükseklik
+
+    // Span'ı gizle ve input'u ekle
+    channelNameSpan.style.display = 'none';
+    listItem.insertBefore(input, channelNameSpan);
+    input.focus();
+    input.select();
+
+    function finishEdit(save = true) {
+        const newName = input.value.trim();
+        input.remove();
+        channelNameSpan.style.display = '';
+
+        if (save && newName && newName !== currentName) {
+            renameChannel(channelUrl, newName);
+        }
+    }
+
+    // Enter tuşu ile kaydet
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            finishEdit(true);
+        }
+    });
+
+    // Focus kaybedince kaydet
+    input.addEventListener('blur', () => {
+        finishEdit(true);
+    });
+
+    // Escape tuşu ile iptal et
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            finishEdit(false);
+        }
+    });
+}
+
+// localStorage'i temizle (gerektiğinde kullanılabilir)
+function clearAllStoredData() {
+    Object.values(STORAGE_KEYS).forEach(key => {
+        localStorage.removeItem(key);
+    });
+    console.log('Tüm localStorage verileri temizlendi.');
+}
+
+
+
+
+
 // Playlist selector'ı güncelle
 function updatePlaylistSelector() {
-    // Mevcut seçenekleri temizle (varsayılan seçenek hariç)
-    const defaultOption = playlistSelector.querySelector('option[value=""]');
+    // Mevcut seçenekleri temizle
     playlistSelector.innerHTML = '';
-    if (defaultOption) {
-        playlistSelector.appendChild(defaultOption);
-    } else {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Playlist seçin...';
-        playlistSelector.appendChild(option);
-    }
 
     // Playlist'leri ekle
     playlists.forEach(playlist => {
         addPlaylistToSelector(playlist);
     });
+
+    // Eğer playlist var ama hiçbiri seçili değilse, ilkini seç
+    if (playlists.length > 0 && (activePlaylistIndex === -1 || activePlaylistIndex >= playlists.length)) {
+        switchToPlaylist(0);
+    }
 }
 
 // Yardımcı fonksiyonlar
@@ -294,13 +367,6 @@ player.on('fullscreenchange', () => {
 });
 
 // Video oynatıcı event listeners
-player.on('volumechange', () => {
-    saveToLocalStorage(STORAGE_KEYS.VOLUME, player.volume());
-});
-
-player.on('loadstart', () => {
-    saveToLocalStorage(STORAGE_KEYS.LAST_PLAYED_URL, player.currentSrc());
-});
 
 function updateToggleHandleVisibility() {
     if (window.innerWidth <= 768) {
@@ -321,18 +387,120 @@ updateToggleHandleVisibility();
 
 window.addEventListener('resize', updateToggleHandleVisibility);
 
+// Arama optimizasyonu için debounce
+let searchTimeout;
+const SEARCH_DELAY = 300; // 300ms gecikme
+
 searchInput.addEventListener('input', (event) => {
     const searchTerm = event.target.value.toLowerCase();
 
-    allChannelItems.forEach(item => {
-        const channelName = item.textContent.toLowerCase();
-        if (channelName.includes(searchTerm)) {
+    // Önceki timeout'u temizle
+    clearTimeout(searchTimeout);
+
+    // Yeni timeout ayarla
+    searchTimeout = setTimeout(() => {
+        performSearch(searchTerm);
+    }, SEARCH_DELAY);
+});
+
+function performSearch(searchTerm) {
+    if (!searchTerm) {
+        // Arama terimi boşsa tüm kanalları göster
+        allChannelItems.forEach(item => {
             item.style.display = '';
-        } else {
-            item.style.display = 'none';
+        });
+        // Grup başlıklarını da göster
+        const groupHeaders = playlistElement.querySelectorAll('.group-header');
+        groupHeaders.forEach(header => {
+            header.style.display = '';
+        });
+        return;
+    }
+
+    // Büyük listeler için batch processing
+    if (allChannelItems.length > 1000) {
+        performSearchOptimized(searchTerm);
+    } else {
+        performSearchNormal(searchTerm);
+    }
+}
+
+function performSearchNormal(searchTerm) {
+    const visibleGroups = new Set();
+
+    allChannelItems.forEach(item => {
+        const channelName = item.querySelector('.channel-name')?.textContent.toLowerCase() || '';
+        const isVisible = channelName.includes(searchTerm);
+
+        item.style.display = isVisible ? '' : 'none';
+
+        // Görünür kanalların gruplarını takip et
+        if (isVisible) {
+            const groupHeader = findGroupHeader(item);
+            if (groupHeader) {
+                visibleGroups.add(groupHeader);
+            }
         }
     });
-});
+
+    // Grup başlıklarını güncelle
+    updateGroupHeadersVisibility(visibleGroups);
+}
+
+function performSearchOptimized(searchTerm) {
+    const visibleGroups = new Set();
+    let processedCount = 0;
+    const batchSize = 100;
+
+    function processBatch() {
+        const endIndex = Math.min(processedCount + batchSize, allChannelItems.length);
+
+        for (let i = processedCount; i < endIndex; i++) {
+            const item = allChannelItems[i];
+            const channelName = item.querySelector('.channel-name')?.textContent.toLowerCase() || '';
+            const isVisible = channelName.includes(searchTerm);
+
+            item.style.display = isVisible ? '' : 'none';
+
+            if (isVisible) {
+                const groupHeader = findGroupHeader(item);
+                if (groupHeader) {
+                    visibleGroups.add(groupHeader);
+                }
+            }
+        }
+
+        processedCount = endIndex;
+
+        if (processedCount < allChannelItems.length) {
+            // Bir sonraki batch'i planla
+            requestAnimationFrame(processBatch);
+        } else {
+            // Arama tamamlandı, grup başlıklarını güncelle
+            updateGroupHeadersVisibility(visibleGroups);
+        }
+    }
+
+    processBatch();
+}
+
+function findGroupHeader(channelItem) {
+    let currentElement = channelItem.previousElementSibling;
+    while (currentElement) {
+        if (currentElement.classList.contains('group-header')) {
+            return currentElement;
+        }
+        currentElement = currentElement.previousElementSibling;
+    }
+    return null;
+}
+
+function updateGroupHeadersVisibility(visibleGroups) {
+    const groupHeaders = playlistElement.querySelectorAll('.group-header');
+    groupHeaders.forEach(header => {
+        header.style.display = visibleGroups.has(header) ? '' : 'none';
+    });
+}
 
 window.addEventListener('mousemove', (event) => {
     if (window.innerWidth > 768) {
@@ -495,11 +663,19 @@ function playNextChannel() {
     if (activePlaylistIndex === -1 || !playlists[activePlaylistIndex]) return;
 
     const currentChannels = playlists[activePlaylistIndex].channels;
-    const currentlyPlayingUrl = player.currentSrc();
-    const currentIndex = currentChannels.findIndex(channel => channel.url === currentlyPlayingUrl);
 
-    if (currentIndex !== -1 && currentIndex < currentChannels.length - 1) {
-        const nextChannel = currentChannels[currentIndex + 1];
+    // Eğer mevcut seçili kanal indeksi geçerli değilse, seçili elementi bul
+    if (currentSelectedChannelIndex === -1) {
+        const selectedItem = playlistElement.querySelector('li.selected');
+        if (selectedItem) {
+            const selectedUrl = selectedItem.dataset.url;
+            currentSelectedChannelIndex = currentChannels.findIndex(channel => channel.url === selectedUrl);
+        }
+    }
+
+    if (currentSelectedChannelIndex !== -1 && currentSelectedChannelIndex < currentChannels.length - 1) {
+        currentSelectedChannelIndex++;
+        const nextChannel = currentChannels[currentSelectedChannelIndex];
         playChannel(nextChannel.url);
         player.play(); // Kanal değiştirmede oynatmaya devam et
 
@@ -516,6 +692,9 @@ function playNextChannel() {
             nextSelectedItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
+        // Son seçili kanalı kaydet
+        saveLastSelectedChannel();
+
     } else {
         console.log('Son kanaldayız.');
     }
@@ -526,11 +705,19 @@ function playPreviousChannel() {
     if (activePlaylistIndex === -1 || !playlists[activePlaylistIndex]) return;
 
     const currentChannels = playlists[activePlaylistIndex].channels;
-    const currentlyPlayingUrl = player.currentSrc();
-    const currentIndex = currentChannels.findIndex(channel => channel.url === currentlyPlayingUrl);
 
-    if (currentIndex > 0) {
-        const previousChannel = currentChannels[currentIndex - 1];
+    // Eğer mevcut seçili kanal indeksi geçerli değilse, seçili elementi bul
+    if (currentSelectedChannelIndex === -1) {
+        const selectedItem = playlistElement.querySelector('li.selected');
+        if (selectedItem) {
+            const selectedUrl = selectedItem.dataset.url;
+            currentSelectedChannelIndex = currentChannels.findIndex(channel => channel.url === selectedUrl);
+        }
+    }
+
+    if (currentSelectedChannelIndex > 0) {
+        currentSelectedChannelIndex--;
+        const previousChannel = currentChannels[currentSelectedChannelIndex];
         playChannel(previousChannel.url);
         player.play(); // Kanal değiştirmede oynatmaya devam et
 
@@ -546,6 +733,9 @@ function playPreviousChannel() {
             // İsteğe bağlı: Yeni seçili öğeye scroll yap
             previousSelectedItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+
+        // Son seçili kanalı kaydet
+        saveLastSelectedChannel();
 
     } else {
         console.log('İlk kanaldayız.');
@@ -564,27 +754,23 @@ function adjustVolume(newVolume) {
 
 playlistToggleHandle.addEventListener('click', () => {
     body.classList.toggle('playlist-visible');
-    // Playlist görünürlük durumunu kaydet
-    saveToLocalStorage(STORAGE_KEYS.PLAYLIST_VISIBLE, body.classList.contains('playlist-visible'));
 });
 
 // Playlist selector event listener
 playlistSelector.addEventListener('change', (event) => {
     const selectedPlaylistId = parseInt(event.target.value);
-    if (selectedPlaylistId) {
+    if (selectedPlaylistId && !isNaN(selectedPlaylistId)) {
         const index = playlists.findIndex(p => p.id === selectedPlaylistId);
         if (index !== -1) {
             switchToPlaylist(index);
         }
     }
     updatePlaylistActionButtons();
-    // Aktif playlist indeksini kaydet
-    saveToLocalStorage(STORAGE_KEYS.ACTIVE_PLAYLIST_INDEX, activePlaylistIndex);
 });
 
 // Update playlist action buttons state
 function updatePlaylistActionButtons() {
-    const hasSelectedPlaylist = playlistSelector.value && playlistSelector.value !== "";
+    const hasSelectedPlaylist = playlists.length > 0 && activePlaylistIndex >= 0;
     renamePlaylistBtn.disabled = !hasSelectedPlaylist;
     deletePlaylistBtn.disabled = !hasSelectedPlaylist;
     // Upload button is always enabled, so we don't disable it
@@ -680,16 +866,23 @@ function renamePlaylist(playlistId, newName) {
     if (playlist) {
         playlist.name = newName;
 
-        // Update the option text in selector
+        // Update the option text in selector with truncation
         const option = playlistSelector.querySelector(`option[value="${playlistId}"]`);
         if (option) {
-            option.textContent = newName;
+            // Playlist ismini kısalt (maksimum 25 karakter + ellipsis)
+            let displayName = newName;
+            if (displayName.length > 25) {
+                displayName = displayName.substring(0, 22) + '...';
+            }
+
+            option.textContent = displayName;
+            option.title = newName; // Tam ismi tooltip olarak göster
         }
 
         console.log(`Playlist renamed to: ${newName}`);
 
-        // Playlist verilerini localStorage'e kaydet
-        saveToLocalStorage(STORAGE_KEYS.PLAYLISTS, playlists);
+        // localStorage'e kaydet
+        savePlaylistsToStorage();
     }
 }
 
@@ -750,8 +943,10 @@ function handleSingleFile(file) {
         uploadModal.style.display = 'none';
         clearModalInputs();
 
-        // Playlist verilerini localStorage'e kaydet
-        saveAllDataToLocalStorage();
+        // localStorage'e kaydet
+        savePlaylistsToStorage();
+
+
     } else {
         alert('Desteklenmeyen dosya türü: ' + fileExtension);
     }
@@ -788,8 +983,10 @@ function handleMultipleFiles(files) {
         uploadModal.style.display = 'none';
         clearModalInputs();
 
-        // Playlist verilerini localStorage'e kaydet
-        saveAllDataToLocalStorage();
+        // localStorage'e kaydet
+        savePlaylistsToStorage();
+
+
     } else {
         alert('Seçilen dosyalar arasında desteklenen medya dosyası bulunamadı.');
     }
@@ -830,8 +1027,9 @@ loadUrlButton.addEventListener('click', async () => {
         uploadModal.style.display = 'none';
         clearModalInputs();
 
-        // Playlist verilerini localStorage'e kaydet
-        saveAllDataToLocalStorage();
+        // localStorage'e kaydet
+        savePlaylistsToStorage();
+
         return;
     }
 
@@ -867,8 +1065,8 @@ function addNewPlaylist(name, content) {
     addPlaylistToSelector(playlist);
     switchToPlaylist(playlists.length - 1);
 
-    // Playlist verilerini localStorage'e kaydet
-    saveAllDataToLocalStorage();
+    // localStorage'e kaydet
+    savePlaylistsToStorage();
 }
 
 function parsePlaylistContent(content, filename = '') {
@@ -1119,7 +1317,15 @@ function parseCueContent(content) {
 function addPlaylistToSelector(playlist) {
     const option = document.createElement('option');
     option.value = playlist.id;
-    option.textContent = playlist.name;
+
+    // Playlist ismini kısalt (maksimum 25 karakter + ellipsis)
+    let displayName = playlist.name;
+    if (displayName.length > 25) {
+        displayName = displayName.substring(0, 22) + '...';
+    }
+
+    option.textContent = displayName;
+    option.title = playlist.name; // Tam ismi tooltip olarak göster
     playlistSelector.appendChild(option);
     updatePlaylistActionButtons();
 }
@@ -1142,27 +1348,29 @@ function removePlaylist(playlistId) {
             switchToPlaylist(newIndex);
         } else {
             activePlaylistIndex = -1;
-            playlistSelector.value = "";
             displayChannels([]);
         }
     } else if (activePlaylistIndex > index) {
         activePlaylistIndex--;
     }
 
-    // Playlist verilerini localStorage'e kaydet
-    saveAllDataToLocalStorage();
+    updatePlaylistActionButtons();
+
+    // localStorage'e kaydet
+    savePlaylistsToStorage();
 }
 
 function switchToPlaylist(index) {
     if (index < 0 || index >= playlists.length) return;
 
     activePlaylistIndex = index;
+    currentSelectedChannelIndex = -1; // Playlist değiştiğinde seçili kanal indeksini sıfırla
     playlistSelector.value = playlists[index].id;
     displayChannels(playlists[index].channels);
     updatePlaylistActionButtons();
 
-    // Aktif playlist indeksini kaydet
-    saveToLocalStorage(STORAGE_KEYS.ACTIVE_PLAYLIST_INDEX, activePlaylistIndex);
+    // localStorage'e kaydet
+    savePlaylistsToStorage();
 }
 
 
@@ -1207,20 +1415,127 @@ function parseM3uContent(content, shouldDisplay = true) {
     return channels;
 }
 
+// Performans optimizasyonu için global değişkenler
+let isRenderingChannels = false;
+let renderQueue = [];
+const BATCH_SIZE = 50; // Her seferde render edilecek kanal sayısı
+
 function displayChannels(channels) {
+    // Eğer zaten render işlemi devam ediyorsa, yeni isteği kuyruğa ekle
+    if (isRenderingChannels) {
+        renderQueue.push(channels);
+        return;
+    }
+
     playlistElement.innerHTML = '';
+    currentSelectedChannelIndex = -1;
+    allChannelItems = [];
 
     if (channels.length === 0) {
         const listItem = document.createElement('li');
         listItem.textContent = "M3U dosyasında/URL'sinde kanal bulunamadı.";
         playlistElement.appendChild(listItem);
         searchInput.value = '';
-        allChannelItems = [];
         return;
     }
 
-    allChannelItems = [];
+    // Büyük kanal listesi için optimizasyon
+    if (channels.length > 1000) {
+        displayChannelsOptimized(channels);
+    } else {
+        displayChannelsNormal(channels);
+    }
+}
 
+function displayChannelsOptimized(channels) {
+    isRenderingChannels = true;
+
+    // Loading göstergesi ekle
+    const loadingItem = document.createElement('li');
+    loadingItem.textContent = `${channels.length} kanal yükleniyor...`;
+    loadingItem.style.color = '#4a9eff';
+    loadingItem.style.textAlign = 'center';
+    loadingItem.style.padding = '20px';
+    loadingItem.classList.add('loading-item');
+    playlistElement.appendChild(loadingItem);
+
+    const groupedChannels = channels.reduce((groups, channel) => {
+        const group = channel.group || 'Diğer Kanallar';
+        if (!groups[group]) {
+            groups[group] = [];
+        }
+        groups[group].push(channel);
+        return groups;
+    }, {});
+
+    // Loading göstergesini kaldır
+    playlistElement.removeChild(loadingItem);
+
+    let firstChannelItem = null;
+    let processedCount = 0;
+
+    // Tüm kanalları düz bir liste haline getir (grup bilgisi ile birlikte)
+    const flatChannels = [];
+    for (const group in groupedChannels) {
+        if (groupedChannels.hasOwnProperty(group)) {
+            // Grup başlığı ekle
+            flatChannels.push({ type: 'group', name: group });
+            // Grup kanallarını ekle
+            groupedChannels[group].forEach(channel => {
+                flatChannels.push({ type: 'channel', data: channel });
+            });
+        }
+    }
+
+    // Batch processing ile kanalları render et
+    function renderBatch() {
+        let batchCount = 0;
+
+        while (processedCount < flatChannels.length && batchCount < BATCH_SIZE) {
+            const item = flatChannels[processedCount];
+
+            if (item.type === 'group') {
+                // Grup başlığı oluştur
+                const groupHeader = document.createElement('li');
+                groupHeader.classList.add('group-header');
+                groupHeader.textContent = item.name;
+                groupHeader.dataset.group = item.name;
+                playlistElement.appendChild(groupHeader);
+            } else if (item.type === 'channel') {
+                // Kanal elementi oluştur
+                const channel = item.data;
+                const listItem = createChannelElement(channel);
+
+                playlistElement.appendChild(listItem);
+                allChannelItems.push(listItem);
+
+                if (!firstChannelItem && channel.url) {
+                    firstChannelItem = listItem;
+                }
+
+                batchCount++; // Sadece kanallar için batch sayısını artır
+            }
+
+            processedCount++;
+        }
+
+        // Progress göstergesi güncelle
+        if (processedCount < flatChannels.length) {
+            // Bir sonraki batch'i requestAnimationFrame ile planla
+            requestAnimationFrame(() => {
+                setTimeout(renderBatch, 0); // UI'ı bloklamadan devam et
+            });
+        } else {
+            // Render tamamlandı
+            finishChannelRendering(firstChannelItem);
+        }
+    }
+
+    // İlk batch'i başlat
+    renderBatch();
+}
+
+function displayChannelsNormal(channels) {
     const groupedChannels = channels.reduce((groups, channel) => {
         const group = channel.group || 'Diğer Kanallar';
         if (!groups[group]) {
@@ -1239,37 +1554,7 @@ function displayChannels(channels) {
             playlistElement.appendChild(groupHeader);
 
             groupedChannels[group].forEach(channel => {
-                const listItem = document.createElement('li');
-                listItem.textContent = channel.name;
-                listItem.dataset.url = channel.url;
-
-                listItem.addEventListener('click', (event) => {
-                    const previouslySelected = playlistElement.querySelector('li.selected');
-                    if (previouslySelected) {
-                        previouslySelected.classList.remove('selected');
-                    }
-
-                    event.currentTarget.classList.add('selected');
-
-                    const urlToCopy = event.currentTarget.dataset.url;
-                    if (event.shiftKey) {
-                        navigator.clipboard.writeText(urlToCopy).then(() => {
-                            console.log('URL panoya kopyalandı:', urlToCopy);
-                            event.currentTarget.classList.add('copied');
-                            setTimeout(() => {
-                                event.currentTarget.classList.remove('copied');
-                            }, 1000);
-                        }).catch(err => {
-                            console.error('URL kopyalanırken hata oluştu:', err);
-                        });
-                    } else {
-                        playChannel(urlToCopy, false);
-                        player.play(); // Manuel seçimde oynatmaya başla
-
-                        // Son seçili kanalı kaydet
-                        saveLastSelectedChannel();
-                    }
-                });
+                const listItem = createChannelElement(channel);
                 playlistElement.appendChild(listItem);
                 allChannelItems.push(listItem);
 
@@ -1280,13 +1565,142 @@ function displayChannels(channels) {
         }
     }
 
+    finishChannelRendering(firstChannelItem);
+}
+
+function createChannelElement(channel) {
+    const listItem = document.createElement('li');
+    listItem.dataset.url = channel.url;
+    listItem.classList.add('channel-item');
+
+    // Kanal ismi için span
+    const channelName = document.createElement('span');
+    channelName.textContent = channel.name;
+    channelName.classList.add('channel-name');
+
+    // Buton konteyner
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('channel-buttons');
+
+    // Düzenleme butonu
+    const editButton = document.createElement('button');
+    editButton.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+        </svg>
+    `;
+    editButton.classList.add('channel-btn', 'edit-btn');
+    editButton.title = 'Kanal ismini düzenle';
+
+    // Silme butonu
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+        </svg>
+    `;
+    deleteButton.classList.add('channel-btn', 'delete-btn');
+    deleteButton.title = 'Kanalı sil';
+
+    buttonContainer.appendChild(editButton);
+    buttonContainer.appendChild(deleteButton);
+
+    listItem.appendChild(channelName);
+    listItem.appendChild(buttonContainer);
+
+    return listItem;
+}
+
+function finishChannelRendering(firstChannelItem) {
+    isRenderingChannels = false;
+
+    // Event delegation kullanarak tek listener ekle
+    if (!playlistElement.hasAttribute('data-events-attached')) {
+        playlistElement.addEventListener('click', handleChannelClick);
+        playlistElement.setAttribute('data-events-attached', 'true');
+    }
+
     if (firstChannelItem) {
         firstChannelItem.classList.add('selected');
-        // İlk kanal seçili olarak işaretlenir ama otomatik oynatılmaz
         playChannel(firstChannelItem.dataset.url, false);
 
-        // İlk kanal seçimini kaydet (sadece yeni playlist yüklendiğinde)
-        saveLastSelectedChannel();
+        if (activePlaylistIndex >= 0 && playlists[activePlaylistIndex]) {
+            const currentChannels = playlists[activePlaylistIndex].channels;
+            currentSelectedChannelIndex = currentChannels.findIndex(channel => channel.url === firstChannelItem.dataset.url);
+        }
+    }
+
+    // Son seçili kanalı geri yükle
+    setTimeout(() => {
+        restoreLastSelectedChannel();
+    }, 100);
+
+    // Kuyruktaki render isteklerini işle
+    if (renderQueue.length > 0) {
+        const nextChannels = renderQueue.shift();
+        displayChannels(nextChannels);
+    }
+}
+
+// Event delegation ile optimize edilmiş click handler
+function handleChannelClick(event) {
+    const target = event.target;
+    const listItem = target.closest('.channel-item');
+
+    if (!listItem) return;
+
+    // Edit button
+    if (target.closest('.edit-btn')) {
+        event.stopPropagation();
+        const channelName = listItem.querySelector('.channel-name');
+        enableChannelNameEdit(listItem, channelName);
+        return;
+    }
+
+    // Delete button
+    if (target.closest('.delete-btn')) {
+        event.stopPropagation();
+        const channelUrl = listItem.dataset.url;
+        const channelNameText = listItem.querySelector('.channel-name').textContent;
+
+        const confirmDelete = confirm(`"${channelNameText}" kanalını listeden silmek istediğinizden emin misiniz?`);
+        if (confirmDelete) {
+            removeChannelFromPlaylist(channelUrl);
+        }
+        return;
+    }
+
+    // Channel selection
+    if (!target.classList.contains('channel-btn')) {
+        const previouslySelected = playlistElement.querySelector('li.selected');
+        if (previouslySelected) {
+            previouslySelected.classList.remove('selected');
+        }
+
+        listItem.classList.add('selected');
+
+        const urlToCopy = listItem.dataset.url;
+        if (event.shiftKey) {
+            navigator.clipboard.writeText(urlToCopy).then(() => {
+                console.log('URL panoya kopyalandı:', urlToCopy);
+                listItem.classList.add('copied');
+                setTimeout(() => {
+                    listItem.classList.remove('copied');
+                }, 1000);
+            }).catch(err => {
+                console.error('URL kopyalanırken hata oluştu:', err);
+            });
+        } else {
+            playChannel(urlToCopy, false);
+            player.play();
+
+            if (activePlaylistIndex >= 0 && playlists[activePlaylistIndex]) {
+                const currentChannels = playlists[activePlaylistIndex].channels;
+                currentSelectedChannelIndex = currentChannels.findIndex(channel => channel.url === urlToCopy);
+            }
+
+            saveLastSelectedChannel();
+        }
     }
 }
 
@@ -1307,9 +1721,6 @@ function playChannel(url, shouldMute = false) {
         if (shouldMute) {
              player.muted(true);
         }
-
-        // Son oynatılan URL'yi kaydet
-        saveToLocalStorage(STORAGE_KEYS.LAST_PLAYED_URL, url);
 
         // HLS ve DASH desteği kontrolü
         if (mimeType === 'application/x-mpegURL' && !videojs.Html5Hlsjs) {
@@ -1358,11 +1769,22 @@ document.addEventListener('drop', (e) => {
 
 // Sayfa yüklendiğinde localStorage'den verileri yükle
 window.addEventListener('load', () => {
-    // localStorage'den verileri yükle
-    loadAllDataFromLocalStorage();
+    // Animasyonları devre dışı bırak
+    body.classList.add('no-transition');
 
-    // Eğer hiç playlist yoksa varsayılan playlist'i yükle
-    if (playlists.length === 0 && defaultM3uUrl) {
+    // Playlist görünürlüğünü varsayılan olarak ayarla
+    body.classList.add('playlist-visible');
+
+    // Kısa bir süre sonra animasyonları tekrar etkinleştir
+    setTimeout(() => {
+        body.classList.remove('no-transition');
+    }, 100);
+
+    // Önce localStorage'den verileri yükle
+    const hasStoredData = loadPlaylistsFromStorage();
+
+    // Eğer localStorage'de veri yoksa varsayılan playlist'i yükle
+    if (!hasStoredData && defaultM3uUrl) {
         console.log('Varsayılan M3U URL yükleniyor:', defaultM3uUrl);
         fetch(defaultM3uUrl)
             .then(response => {
@@ -1374,11 +1796,6 @@ window.addEventListener('load', () => {
             .then(content => {
                 addNewPlaylist('Varsayılan', content);
                 console.log('Varsayılan M3U listesi başarıyla yüklendi.');
-
-                // İlk kez yüklenen varsayılan playlist'te ilk kanalı seç ve kaydet
-                setTimeout(() => {
-                    saveLastSelectedChannel();
-                }, 100);
             })
             .catch(error => {
                 console.error('Varsayılan M3U URL yüklenirken hata oluştu:', error);
@@ -1388,6 +1805,8 @@ window.addEventListener('load', () => {
                 listItem.style.color = 'red';
                 playlistElement.appendChild(listItem);
             });
+    } else if (hasStoredData) {
+        console.log('localStorage\'den playlist verileri yüklendi.');
     }
 
     updatePlaylistActionButtons(); // Initialize button states
@@ -1406,12 +1825,4 @@ window.addEventListener('resize', () => {
     }*/
 });
 
-// Sayfa kapatılmadan önce verileri kaydet
-window.addEventListener('beforeunload', () => {
-    saveAllDataToLocalStorage();
-});
 
-// Periyodik olarak verileri kaydet (her 30 saniyede bir)
-setInterval(() => {
-    saveAllDataToLocalStorage();
-}, 30000);
