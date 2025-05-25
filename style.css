@@ -65,6 +65,11 @@ body.playlist-visible .main-content .video-js {
     transition: margin-left 0.3s ease;
 }
 
+/* Disable margin-left transition during fullscreen transitions */
+body.fullscreen-transition.playlist-visible .main-content .video-js {
+    transition: none !important;
+}
+
 #playlist h2 {
     margin-top: 0;
     margin-bottom: 15px;
@@ -220,111 +225,95 @@ body.playlist-visible #playlist-toggle-handle span {
     margin-bottom: 10px;
 }
 
-#upload-button {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6b 100%);
-    color: #ffffff;
+
+
+.playlist-selector-container {
+    margin-bottom: 15px;
+}
+
+.playlist-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#playlist-selector {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background-color: #252525;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+#playlist-selector:focus {
+    border-color: #4a9eff;
+    background-color: #2a2a2a;
+    box-shadow: 0 0 8px rgba(74, 158, 255, 0.2);
+}
+
+#playlist-selector option {
+    background-color: #252525;
+    color: #e0e0e0;
+    padding: 8px;
+}
+
+.playlist-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.playlist-action-btn {
+    background: #444;
+    color: #777;
     border: none;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 13px;
+    border-radius: 4px;
+    padding: 6px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(30, 58, 95, 0.3);
-    position: relative;
-    overflow: hidden;
+    transition: all 0.2s ease;
+    width: 26px;
+    height: 26px;
+    opacity: 0.7;
 }
 
-#upload-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
+.playlist-action-btn:hover {
+    background: #555;
+    color: #999;
+    opacity: 1;
+}
+
+.playlist-action-btn:active {
+    background: #333;
+}
+
+.playlist-action-btn:disabled {
+    background: #333;
+    color: #555;
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 #upload-button:hover {
-    background: linear-gradient(135deg, #4a9eff 0%, #5ba8ff 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
-}
-
-#upload-button:hover::before {
-    left: 100%;
-}
-
-#upload-button:active {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(74, 158, 255, 0.3);
-}
-
-#upload-button svg {
-    transition: transform 0.2s ease;
+    color: #4caf50;
 }
 
 #upload-button:hover svg {
     transform: rotate(90deg);
 }
 
-#playlist-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-bottom: 10px;
-    max-height: 80px;
-    overflow-y: auto;
+#rename-playlist-btn:hover {
+    color: #4a9eff;
 }
 
-.playlist-tab {
-    background-color: #252525;
-    color: #d0d0d0;
-    border: 1px solid #333;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.playlist-tab:hover {
-    background-color: #2d2d2d;
-    color: #ffffff;
-    border-color: #444;
-}
-
-.playlist-tab.active {
-    background-color: #1e3a5f;
-    color: #ffffff;
-    border-color: #4a9eff;
-}
-
-.playlist-tab .close-tab {
-    background: none;
-    border: none;
-    color: inherit;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 2px;
-    margin-left: 4px;
-    opacity: 0.6;
-    border-radius: 3px;
-    transition: all 0.2s ease;
-}
-
-.playlist-tab .close-tab:hover {
-    opacity: 1;
-    background-color: rgba(255, 255, 255, 0.1);
+#delete-playlist-btn:hover {
+    color: #ff6b6b;
 }
 
 
@@ -343,10 +332,10 @@ body.playlist-visible #playlist-toggle-handle span {
 
 .modal-content {
     background-color: #2a2a2a;
-    margin: 10% auto;
+    margin: 15% auto;
     border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
+    width: 85%;
+    max-width: 420px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
@@ -354,7 +343,7 @@ body.playlist-visible #playlist-toggle-handle span {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 15px 18px;
     border-bottom: 1px solid #555;
 }
 
@@ -376,18 +365,18 @@ body.playlist-visible #playlist-toggle-handle span {
 }
 
 .modal-body {
-    padding: 20px;
+    padding: 18px;
 }
 
 #playlist-name {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
+    padding: 8px 10px;
+    margin-bottom: 15px;
     border: 1px solid #555;
     border-radius: 4px;
     background-color: #333;
     color: #f4f4f4;
-    font-size: 1rem;
+    font-size: 0.9rem;
     box-sizing: border-box;
 }
 
@@ -398,13 +387,13 @@ body.playlist-visible #playlist-toggle-handle span {
 .upload-options {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
 }
 
 .upload-option {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .upload-option label {
@@ -414,16 +403,24 @@ body.playlist-visible #playlist-toggle-handle span {
 
 .upload-option input[type="file"],
 .upload-option input[type="url"] {
-    padding: 10px;
+    padding: 8px 10px;
     border: 1px solid #555;
     border-radius: 4px;
     background-color: #333;
     color: #f4f4f4;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .upload-option input[type="url"]::placeholder {
     color: #bbb;
+}
+
+.upload-option small {
+    color: #999;
+    font-size: 0.75rem;
+    margin-top: 3px;
+    display: block;
+    line-height: 1.2;
 }
 
 #load-url {
@@ -431,14 +428,89 @@ body.playlist-visible #playlist-toggle-handle span {
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 10px 20px;
-    font-size: 1rem;
+    padding: 8px 16px;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
 #load-url:hover {
     background-color: #0056b3;
+}
+
+/* Rename Modal Styles */
+#new-playlist-name {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 15px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #333;
+    color: #f4f4f4;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+#new-playlist-name::placeholder {
+    color: #bbb;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.modal-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#save-rename-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+#save-rename-btn:hover {
+    background-color: #0056b3;
+}
+
+#cancel-rename-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+#cancel-rename-btn:hover {
+    background-color: #545b62;
+}
+
+/* Drag & Drop Styles */
+body.drag-over {
+    background-color: rgba(74, 158, 255, 0.1);
+}
+
+body.drag-over::before {
+    content: 'Dosyaları buraya bırakın';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #4a9eff;
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    pointer-events: none;
+    border: 3px dashed #4a9eff;
+    box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
@@ -507,12 +579,17 @@ body.playlist-visible #playlist-toggle-handle span {
             margin-left: 300px;
         }
 
+        /* Disable margin-left transition during fullscreen transitions - Mobile Landscape */
+        body.fullscreen-transition.playlist-visible .main-content .video-js {
+            transition: none !important;
+        }
+
         #playlist {
             width: 300px;
             position: fixed;
             top: 0;
             left: 0;
-            height: calc(100vh - 45px);
+            height: calc(100vh - 59.9px);
             transform: translateX(-100%);
             opacity: 0;
             transition: transform 0.3s ease, opacity 0.3s ease;
@@ -537,10 +614,12 @@ body.playlist-visible #playlist-toggle-handle span {
         margin-left: 300px;
     }
 
+    /* Disable margin-left transition during fullscreen transitions - Desktop */
+    body.fullscreen-transition.playlist-visible .main-content .video-js {
+        transition: none !important;
+    }
+
     #playlist-toggle-handle {
         display: flex;
     }
-
-
 }
-

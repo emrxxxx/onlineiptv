@@ -14,15 +14,30 @@
             <div id="playlist">
                 <div class="playlist-header-container">
                     <h2>Playlist Listesi</h2>
-                    <button id="upload-button">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                        </svg>
-                        Ekle
-                    </button>
                 </div>
-                <div id="playlist-tabs">
-                    <!-- Playlist sekmeleri buraya eklenecek -->
+                <div class="playlist-selector-container">
+                    <div class="playlist-selector-wrapper">
+                        <select id="playlist-selector">
+                            <option value="">Playlist seçin...</option>
+                        </select>
+                        <div class="playlist-actions">
+                            <button id="upload-button" class="playlist-action-btn" title="Yeni playlist ekle">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                            </button>
+                            <button id="rename-playlist-btn" class="playlist-action-btn" title="Playlist adını değiştir">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                </svg>
+                            </button>
+                            <button id="delete-playlist-btn" class="playlist-action-btn" title="Playlist'i sil">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <input type="text" id="playlist-search" placeholder="Kanal ara...">
                 <ul>
@@ -58,13 +73,32 @@
                 <div class="upload-options">
                     <div class="upload-option">
                         <label for="file-upload">Dosya Yükle:</label>
-                        <input type="file" id="file-upload" accept=".m3u,.m3u8">
+                        <input type="file" id="file-upload" accept=".m3u,.m3u8,.mp4,.avi,.mkv,.mov,.wmv,.flv,.webm,.ogg,.mp3,.wav,.aac,.flac,.m4a,.pls,.xspf,.asx,.wpl,.cue,.json" multiple>
+                        <small>Desteklenen formatlar: Video (MP4, AVI, MKV, MOV, WMV, FLV, WebM, OGG), Audio (MP3, WAV, AAC, FLAC, M4A), Playlist (M3U, M3U8, PLS, XSPF, ASX, WPL, CUE, JSON)</small>
                     </div>
                     <div class="upload-option">
                         <label for="url-input">URL Gir:</label>
-                        <input type="url" id="url-input" placeholder="M3U URL'sini buraya yapıştırın">
+                        <input type="url" id="url-input" placeholder="Medya veya playlist URL'sini buraya yapıştırın">
                         <button id="load-url">Yükle</button>
+                        <small>Video, audio veya playlist URL'leri desteklenir</small>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Playlist Modal -->
+    <div id="rename-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Playlist Adını Değiştir</h3>
+                <span class="close-rename">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="new-playlist-name" placeholder="Yeni playlist adı">
+                <div class="modal-buttons">
+                    <button id="save-rename-btn">Kaydet</button>
+                    <button id="cancel-rename-btn">İptal</button>
                 </div>
             </div>
         </div>
