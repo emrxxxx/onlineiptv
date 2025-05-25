@@ -18,6 +18,8 @@ const playlistNameInput = document.getElementById('playlist-name');
 const fileUpload = document.getElementById('file-upload');
 const urlInput = document.getElementById('url-input');
 const loadUrlButton = document.getElementById('load-url');
+const textInput = document.getElementById('text-input');
+const loadTextButton = document.getElementById('load-text');
 const playlistSelector = document.getElementById('playlist-selector');
 
 // Playlist action buttons
@@ -289,6 +291,36 @@ function isMediaFile(extension) {
     return videoExtensions.includes(extension) || audioExtensions.includes(extension);
 }
 
+function isValidUrl(string) {
+    try {
+        const url = new URL(string);
+        // Sadece HTTP ve HTTPS protokollerini kabul et
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (error) {
+        // URL constructor başarısız olursa, manuel kontrol yap
+        const trimmed = string.trim().toLowerCase();
+
+        // Temel HTTP/HTTPS kontrolü
+        if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+            return false;
+        }
+
+        // Minimum URL formatı kontrolü (protocol + domain)
+        const withoutProtocol = trimmed.replace(/^https?:\/\//, '');
+        if (withoutProtocol.length === 0) {
+            return false;
+        }
+
+        // Temel domain/IP kontrolü
+        const domainPart = withoutProtocol.split('/')[0];
+        if (domainPart.length === 0) {
+            return false;
+        }
+
+        return true;
+    }
+}
+
 function getMimeType(url, extension) {
     // HLS streams
     if (url.includes('.m3u8') || extension === 'm3u8') {
@@ -332,7 +364,20 @@ function getMimeType(url, extension) {
         'opus': 'audio/opus'
     };
 
-    return videoMimeTypes[extension] || audioMimeTypes[extension] || 'video/mp4';
+    // Bilinen MIME type varsa onu döndür
+    const knownMimeType = videoMimeTypes[extension] || audioMimeTypes[extension];
+    if (knownMimeType) {
+        return knownMimeType;
+    }
+
+    // Bilinmeyen URL'ler için akıllı tahmin
+    // IPTV servisleri genellikle HLS kullanır
+    if (url.includes(':8080') || url.includes('/live/') || url.includes('/stream/')) {
+        return 'application/x-mpegURL';
+    }
+
+    // Varsayılan olarak MP4 döndür (Video.js çoğu formatı otomatik algılar)
+    return 'video/mp4';
 }
 
 // Dokunmatik olay dinleyicileri için değişkenler
@@ -890,6 +935,7 @@ function clearModalInputs() {
     playlistNameInput.value = '';
     fileUpload.value = '';
     urlInput.value = '';
+    textInput.value = '';
 }
 
 // Dosya yükleme
@@ -920,8 +966,8 @@ function handleSingleFile(file) {
             clearModalInputs();
         };
         reader.readAsText(file);
-    } else if (isMediaFile(fileExtension)) {
-        // Tek medya dosyası
+    } else {
+        // Diğer tüm dosyaları medya dosyası olarak işle
         const url = URL.createObjectURL(file);
         const channels = [{
             name: file.name.replace(/\.[^/.]+$/, ""),
@@ -945,10 +991,6 @@ function handleSingleFile(file) {
 
         // localStorage'e kaydet
         savePlaylistsToStorage();
-
-
-    } else {
-        alert('Desteklenmeyen dosya türü: ' + fileExtension);
     }
 }
 
@@ -958,7 +1000,8 @@ function handleMultipleFiles(files) {
 
     files.forEach(file => {
         const fileExtension = getFileExtension(file.name);
-        if (isMediaFile(fileExtension)) {
+        // Playlist dosyaları hariç tüm dosyaları medya dosyası olarak işle
+        if (!isPlaylistFile(fileExtension)) {
             const url = URL.createObjectURL(file);
             channels.push({
                 name: file.name.replace(/\.[^/.]+$/, ""),
@@ -985,10 +1028,8 @@ function handleMultipleFiles(files) {
 
         // localStorage'e kaydet
         savePlaylistsToStorage();
-
-
     } else {
-        alert('Seçilen dosyalar arasında desteklenen medya dosyası bulunamadı.');
+        alert('Seçilen dosyalar arasında medya dosyası bulunamadı (sadece playlist dosyaları seçilmiş).');
     }
 }
 
@@ -1002,11 +1043,90 @@ loadUrlButton.addEventListener('click', async () => {
         return;
     }
 
-    const urlExtension = getFileExtension(url.split('?')[0]);
+    // URL protokol kontrolü
+    if (!isValidUrl(url)) {
+        alert('Geçersiz URL formatı! URL http:// veya https:// ile başlamalıdır.\n\nÖrnekler:\n• http://example.com/playlist.m3u8\n• https://example.com/stream.mp4\n• http://192.168.1.100:8080/stream');
+        return;
+    }
+
     const playlistName = playlistNameInput.value.trim() || `URL Playlist ${playlistCounter + 1}`;
 
-    // Direkt medya dosyası URL'si ise
-    if (isMediaFile(urlExtension) || url.includes('.m3u8') || url.includes('.mpd')) {
+    // Önce playlist dosyası olarak deneyelim
+    try {
+        let fetchUrl = url;
+
+        // CORS sorunu için proxy kullan (sadece gerektiğinde)
+        const corsProxies = [
+            '', // Önce direkt dene
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?'
+        ];
+
+        let response;
+        let content;
+
+        for (const proxy of corsProxies) {
+            try {
+                fetchUrl = proxy + encodeURIComponent(url);
+                if (proxy === '') fetchUrl = url; // İlk deneme direkt URL
+
+                response = await fetch(fetchUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                content = await response.text();
+                break; // Başarılı olursa döngüden çık
+            } catch (proxyError) {
+                console.log(`Proxy ${proxy || 'direct'} failed:`, proxyError.message);
+                if (proxy === corsProxies[corsProxies.length - 1]) {
+                    throw proxyError; // Son proxy da başarısız olursa hatayı fırlat
+                }
+                continue; // Sonraki proxy'yi dene
+            }
+        }
+
+        // İçerik playlist formatında mı kontrol et
+        if (content.includes('#EXTINF') || content.includes('#EXT-X-') ||
+            content.includes('[playlist]') || content.includes('<playlist') ||
+            content.includes('<asx') || content.includes('FILE ')) {
+            // Playlist dosyası olarak işle
+            addNewPlaylist(playlistName, content);
+        } else {
+            // Direkt streaming URL'si olarak işle
+            const channels = [{
+                name: playlistName,
+                url: url,
+                group: "URL Medya",
+                duration: -1,
+                attributes: ""
+            }];
+
+            const playlist = {
+                id: ++playlistCounter,
+                name: playlistName,
+                channels: channels
+            };
+
+            playlists.push(playlist);
+            addPlaylistToSelector(playlist);
+            switchToPlaylist(playlists.length - 1);
+
+            // localStorage'e kaydet
+            savePlaylistsToStorage();
+        }
+
+        uploadModal.style.display = 'none';
+        clearModalInputs();
+
+    } catch (error) {
+        // Fetch başarısız olursa, direkt streaming URL'si olarak işle
+        console.log('URL fetch başarısız, direkt streaming URL olarak işleniyor:', error.message);
+
+        // CORS hatası için özel mesaj
+        if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+            console.log('CORS hatası algılandı, URL direkt streaming linki olarak ekleniyor');
+        }
+
         const channels = [{
             name: playlistName,
             url: url,
@@ -1030,21 +1150,76 @@ loadUrlButton.addEventListener('click', async () => {
         // localStorage'e kaydet
         savePlaylistsToStorage();
 
+        // Kullanıcıya bilgi ver
+        alert(`URL eklendi! Not: URL'ye erişim sağlanamadı (CORS kısıtlaması), bu nedenle direkt streaming linki olarak eklendi. Eğer bu bir playlist dosyası ise, dosyayı indirip yükleyebilirsiniz.`);
+    }
+});
+
+// URL input real-time validation
+urlInput.addEventListener('input', (event) => {
+    const url = event.target.value.trim();
+    const loadButton = loadUrlButton;
+
+    if (!url) {
+        // Boş input
+        loadButton.disabled = false;
+        loadButton.style.opacity = '1';
+        loadButton.title = '';
+        event.target.style.borderColor = '#555';
         return;
     }
 
-    // Playlist dosyası olabilir, içeriği indir
+    if (isValidUrl(url)) {
+        // Geçerli URL
+        loadButton.disabled = false;
+        loadButton.style.opacity = '1';
+        loadButton.title = '';
+        event.target.style.borderColor = '#555';
+    } else {
+        // Geçersiz URL
+        loadButton.disabled = true;
+        loadButton.style.opacity = '0.5';
+        loadButton.title = 'Geçerli bir HTTP/HTTPS URL\'si girin';
+        event.target.style.borderColor = '#555';
+    }
+});
+
+// Text input real-time validation
+textInput.addEventListener('input', (event) => {
+    const content = event.target.value.trim();
+    const loadButton = loadTextButton;
+
+    if (!content) {
+        // Boş input
+        loadButton.disabled = true;
+        loadButton.style.opacity = '0.5';
+        loadButton.title = 'Playlist içeriği girin';
+        event.target.style.borderColor = '#555';
+    } else {
+        // İçerik var
+        loadButton.disabled = false;
+        loadButton.style.opacity = '1';
+        loadButton.title = '';
+        event.target.style.borderColor = '#555';
+    }
+});
+
+// Text input yükleme
+loadTextButton.addEventListener('click', () => {
+    const content = textInput.value.trim();
+    if (!content) {
+        alert('Lütfen playlist içeriğini girin.');
+        return;
+    }
+
+    const playlistName = playlistNameInput.value.trim() || `Manuel Playlist ${playlistCounter + 1}`;
+
     try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const content = await response.text();
         addNewPlaylist(playlistName, content);
         uploadModal.style.display = 'none';
         clearModalInputs();
     } catch (error) {
-        alert(`URL yüklenirken hata oluştu: ${error.message}`);
+        alert(`Playlist işlenirken hata oluştu: ${error.message}`);
     }
 });
 
@@ -1376,12 +1551,26 @@ function switchToPlaylist(index) {
 
 
 function parseM3uContent(content, shouldDisplay = true) {
-    const lines = content.split('\n');
+    // İçerik tek satırda olabilir, önce düzgün formata çevirelim
+    let normalizedContent = content;
+
+    // Eğer içerik tek satırda ise, #EXTINF etiketlerinden önce satır sonu ekle
+    if (!content.includes('\n') && content.includes('#EXTINF')) {
+        normalizedContent = content
+            .replace(/#EXTINF/g, '\n#EXTINF')
+            .replace(/http/g, '\nhttp')
+            .replace(/^[\s\n]+/, '') // Başındaki boşlukları temizle
+            .trim();
+    }
+
+    const lines = normalizedContent.split('\n');
     const channels = [];
     let currentChannel = null;
 
     for (const line of lines) {
         const trimmedLine = line.trim();
+
+        if (!trimmedLine) continue; // Boş satırları atla
 
         if (trimmedLine.startsWith('#EXTINF:')) {
             const match = trimmedLine.match(/#EXTINF:(-?\d+)(.*?),(.*)/);
@@ -1390,11 +1579,22 @@ function parseM3uContent(content, shouldDisplay = true) {
                     duration: parseInt(match[1], 10),
                     attributes: match[2].trim(),
                     name: match[3].trim(),
-                    url: null
+                    url: null,
+                    group: 'Genel'
                 };
-                const groupMatch = currentChannel.attributes.match(/group-title="(.*?)"/);
+
+                // Grup bilgisini çıkar
+                const groupMatch = currentChannel.attributes.match(/group-title="([^"]*?)"/);
                 if (groupMatch) {
                     currentChannel.group = groupMatch[1];
+                }
+
+                // Eğer grup bilgisi yoksa, köşeli parantez içindeki bilgiyi kullan
+                if (!groupMatch) {
+                    const bracketMatch = currentChannel.attributes.match(/\[([^\]]*?)\]/);
+                    if (bracketMatch) {
+                        currentChannel.group = bracketMatch[1];
+                    }
                 }
             }
         } else if (trimmedLine.startsWith('#EXTVLCOPT:')) {

@@ -490,16 +490,22 @@ body.playlist-visible #playlist-toggle-handle span {
 }
 
 .upload-option input[type="file"],
-.upload-option input[type="url"] {
+.upload-option input[type="url"],
+.upload-option textarea {
     padding: 8px 10px;
     border: 1px solid #555;
     border-radius: 4px;
     background-color: #333;
     color: #f4f4f4;
     font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.upload-option input[type="url"]::placeholder {
+.upload-option input[type="url"]::placeholder,
+.upload-option textarea::placeholder {
     color: #bbb;
 }
 
@@ -509,6 +515,27 @@ body.playlist-visible #playlist-toggle-handle span {
     margin-top: 3px;
     display: block;
     line-height: 1.2;
+}
+
+.upload-option button {
+    background-color: #4a9eff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.upload-option button:hover:not(:disabled) {
+    background-color: #357abd;
+}
+
+.upload-option button:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 #load-url {
@@ -522,8 +549,14 @@ body.playlist-visible #playlist-toggle-handle span {
     transition: background-color 0.3s ease;
 }
 
-#load-url:hover {
+#load-url:hover:not(:disabled) {
     background-color: #0056b3;
+}
+
+#load-url:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 /* Rename Modal Styles */
@@ -673,6 +706,26 @@ body.drag-over::before {
             display: none;
         }
 
+        /* Kanal listesi ekleme paneli tam ekran - Mobil dikey */
+        .modal {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            margin: 0;
+            border-radius: 0;
+            top: -55px;
+            left: 0;
+            transform: none;
+        }
+
+        .modal-content {
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
 
     }
 
@@ -718,6 +771,25 @@ body.drag-over::before {
             opacity: 1;
         }
 
+        /* Kanal listesi ekleme paneli tam ekran - Mobil yatay */
+        .modal {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            margin: 0;
+            border-radius: 0;
+            top: -100px;
+            left: 0;
+            transform: none;
+        }
+
+        .modal-content {
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
 
     }
 }
