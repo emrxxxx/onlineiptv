@@ -2,8 +2,6 @@ const player = videojs('my-video');
 
 const defaultM3uUrl = 'https://raw.githubusercontent.com/Sakubaba00/saku/refs/heads/main/playlist1.m3u';
 
-
-
 const playlistElement = document.querySelector('#playlist ul');
 const playlistContainer = document.getElementById('playlist');
 const body = document.body;
@@ -22,11 +20,9 @@ const textInput = document.getElementById('text-input');
 const loadTextButton = document.getElementById('load-text');
 const playlistSelector = document.getElementById('playlist-selector');
 
-// Playlist action buttons
 const renamePlaylistBtn = document.getElementById('rename-playlist-btn');
 const deletePlaylistBtn = document.getElementById('delete-playlist-btn');
 
-// Rename modal elements
 const renameModal = document.getElementById('rename-modal');
 const closeRenameModal = document.querySelector('.close-rename');
 const newPlaylistNameInput = document.getElementById('new-playlist-name');
@@ -35,15 +31,12 @@ const cancelRenameBtn = document.getElementById('cancel-rename-btn');
 
 let allChannelItems = [];
 
-// Birden fazla playlist yönetimi
 let playlists = [];
 let activePlaylistIndex = -1;
 let playlistCounter = 0;
 
-// Mevcut seçili kanalı takip etmek için
 let currentSelectedChannelIndex = -1;
 
-// localStorage anahtarları
 const STORAGE_KEYS = {
     PLAYLISTS: 'onlinetv_playlists',
     ACTIVE_PLAYLIST: 'onlinetv_active_playlist',
@@ -51,7 +44,6 @@ const STORAGE_KEYS = {
     PLAYLIST_COUNTER: 'onlinetv_playlist_counter'
 };
 
-// localStorage yardımcı fonksiyonları
 function saveToLocalStorage(key, data) {
     try {
         localStorage.setItem(key, JSON.stringify(data));
@@ -70,14 +62,12 @@ function loadFromLocalStorage(key, defaultValue = null) {
     }
 }
 
-// Playlist verilerini localStorage'e kaydet
 function savePlaylistsToStorage() {
     saveToLocalStorage(STORAGE_KEYS.PLAYLISTS, playlists);
     saveToLocalStorage(STORAGE_KEYS.ACTIVE_PLAYLIST, activePlaylistIndex);
     saveToLocalStorage(STORAGE_KEYS.PLAYLIST_COUNTER, playlistCounter);
 }
 
-// En son seçili kanalı kaydet
 function saveLastSelectedChannel() {
     const selectedItem = playlistElement.querySelector('li.selected');
     if (selectedItem && activePlaylistIndex >= 0) {
@@ -93,7 +83,6 @@ function saveLastSelectedChannel() {
     }
 }
 
-// localStorage'den playlist verilerini yükle
 function loadPlaylistsFromStorage() {
     const savedPlaylists = loadFromLocalStorage(STORAGE_KEYS.PLAYLISTS, []);
     const savedActiveIndex = loadFromLocalStorage(STORAGE_KEYS.ACTIVE_PLAYLIST, -1);
@@ -104,45 +93,37 @@ function loadPlaylistsFromStorage() {
         activePlaylistIndex = savedActiveIndex;
         playlistCounter = savedCounter;
 
-        // Playlist selector'ı güncelle
         updatePlaylistSelector();
 
-        // Aktif playlist'i göster
         if (activePlaylistIndex >= 0 && activePlaylistIndex < playlists.length) {
             switchToPlaylist(activePlaylistIndex);
         }
 
-        return true; // Veriler yüklendi
+        return true;
     }
 
-    return false; // Veri yok
+    return false;
 }
 
-// En son seçili kanalı geri yükle
 function restoreLastSelectedChannel() {
     const lastChannel = loadFromLocalStorage(STORAGE_KEYS.LAST_CHANNEL);
 
     if (lastChannel && lastChannel.playlistIndex === activePlaylistIndex) {
-        // Doğru playlist aktifse, son kanalı seç
         const channelItem = allChannelItems.find(item => item.dataset.url === lastChannel.channelUrl);
         if (channelItem) {
-            // Önceki seçimi temizle
             const previouslySelected = playlistElement.querySelector('li.selected');
             if (previouslySelected) {
                 previouslySelected.classList.remove('selected');
             }
 
-            // Son kanalı seç ve oynat
             channelItem.classList.add('selected');
             playChannel(lastChannel.channelUrl, false);
 
-            // Mevcut seçili kanal indeksini güncelle
             if (activePlaylistIndex >= 0 && playlists[activePlaylistIndex]) {
                 const currentChannels = playlists[activePlaylistIndex].channels;
                 currentSelectedChannelIndex = currentChannels.findIndex(channel => channel.url === lastChannel.channelUrl);
             }
 
-            // Kanala scroll yap
             channelItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
             console.log('Son seçili kanal geri yüklendi:', lastChannel.channelName);
@@ -150,7 +131,6 @@ function restoreLastSelectedChannel() {
     }
 }
 
-// Kanalı playlist'ten sil
 function removeChannelFromPlaylist(channelUrl) {
     if (activePlaylistIndex === -1 || !playlists[activePlaylistIndex]) return;
 
@@ -158,20 +138,16 @@ function removeChannelFromPlaylist(channelUrl) {
     const channelIndex = playlist.channels.findIndex(channel => channel.url === channelUrl);
 
     if (channelIndex !== -1) {
-        // Kanalı playlist'ten kaldır
         playlist.channels.splice(channelIndex, 1);
 
-        // Kanal listesini yeniden göster
         displayChannels(playlist.channels);
 
-        // localStorage'e kaydet
         savePlaylistsToStorage();
 
         console.log('Kanal playlist\'ten silindi:', channelUrl);
     }
 }
 
-// Kanal ismini değiştir
 function renameChannel(channelUrl, newName) {
     if (activePlaylistIndex === -1 || !playlists[activePlaylistIndex]) return;
 
@@ -181,37 +157,32 @@ function renameChannel(channelUrl, newName) {
     if (channel) {
         channel.name = newName;
 
-        // Kanal listesini yeniden göster
         displayChannels(playlist.channels);
 
-        // localStorage'e kaydet
         savePlaylistsToStorage();
 
         console.log('Kanal ismi değiştirildi:', newName);
     }
 }
 
-// Kanal ismi düzenleme modu
 function enableChannelNameEdit(listItem, channelNameSpan) {
     const currentName = channelNameSpan.textContent;
     const channelUrl = listItem.dataset.url;
 
-    // Input elementi oluştur
     const input = document.createElement('input');
     input.type = 'text';
     input.value = currentName;
-    input.style.width = 'calc(100% - 70px)'; // Butonlar için daha fazla yer bırak
-    input.style.maxWidth = '150px'; // Maksimum genişlik sınırı
+    input.style.width = 'calc(100% - 70px)';
+    input.style.maxWidth = '150px';
     input.style.background = 'rgba(255, 255, 255, 0.1)';
     input.style.border = '1px solid #4a9eff';
     input.style.borderRadius = '3px';
     input.style.color = 'inherit';
-    input.style.padding = '2px 4px'; // Daha dar padding
-    input.style.fontSize = '0.8rem'; // Daha küçük font
+    input.style.padding = '2px 4px';
+    input.style.fontSize = '0.8rem';
     input.style.outline = 'none';
-    input.style.height = '20px'; // Sabit yükseklik
+    input.style.height = '20px';
 
-    // Span'ı gizle ve input'u ekle
     channelNameSpan.style.display = 'none';
     listItem.insertBefore(input, channelNameSpan);
     input.focus();
@@ -227,19 +198,16 @@ function enableChannelNameEdit(listItem, channelNameSpan) {
         }
     }
 
-    // Enter tuşu ile kaydet
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             finishEdit(true);
         }
     });
 
-    // Focus kaybedince kaydet
     input.addEventListener('blur', () => {
         finishEdit(true);
     });
 
-    // Escape tuşu ile iptal et
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             finishEdit(false);
@@ -247,7 +215,6 @@ function enableChannelNameEdit(listItem, channelNameSpan) {
     });
 }
 
-// localStorage'i temizle (gerektiğinde kullanılabilir)
 function clearAllStoredData() {
     Object.values(STORAGE_KEYS).forEach(key => {
         localStorage.removeItem(key);
@@ -255,27 +222,18 @@ function clearAllStoredData() {
     console.log('Tüm localStorage verileri temizlendi.');
 }
 
-
-
-
-
-// Playlist selector'ı güncelle
 function updatePlaylistSelector() {
-    // Mevcut seçenekleri temizle
     playlistSelector.innerHTML = '';
 
-    // Playlist'leri ekle
     playlists.forEach(playlist => {
         addPlaylistToSelector(playlist);
     });
 
-    // Eğer playlist var ama hiçbiri seçili değilse, ilkini seç
     if (playlists.length > 0 && (activePlaylistIndex === -1 || activePlaylistIndex >= playlists.length)) {
         switchToPlaylist(0);
     }
 }
 
-// Yardımcı fonksiyonlar
 function getFileExtension(filename) {
     return filename.toLowerCase().split('.').pop();
 }
@@ -294,24 +252,19 @@ function isMediaFile(extension) {
 function isValidUrl(string) {
     try {
         const url = new URL(string);
-        // Sadece HTTP ve HTTPS protokollerini kabul et
         return url.protocol === 'http:' || url.protocol === 'https:';
     } catch (error) {
-        // URL constructor başarısız olursa, manuel kontrol yap
         const trimmed = string.trim().toLowerCase();
 
-        // Temel HTTP/HTTPS kontrolü
         if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
             return false;
         }
 
-        // Minimum URL formatı kontrolü (protocol + domain)
         const withoutProtocol = trimmed.replace(/^https?:\/\//, '');
         if (withoutProtocol.length === 0) {
             return false;
         }
 
-        // Temel domain/IP kontrolü
         const domainPart = withoutProtocol.split('/')[0];
         if (domainPart.length === 0) {
             return false;
@@ -322,17 +275,14 @@ function isValidUrl(string) {
 }
 
 function getMimeType(url, extension) {
-    // HLS streams
     if (url.includes('.m3u8') || extension === 'm3u8') {
         return 'application/x-mpegURL';
     }
 
-    // DASH streams
     if (url.includes('.mpd') || extension === 'mpd') {
         return 'application/dash+xml';
     }
 
-    // Video formats
     const videoMimeTypes = {
         'mp4': 'video/mp4',
         'webm': 'video/webm',
@@ -351,7 +301,6 @@ function getMimeType(url, extension) {
         'm2ts': 'video/mp2t'
     };
 
-    // Audio formats
     const audioMimeTypes = {
         'mp3': 'audio/mpeg',
         'wav': 'audio/wav',
@@ -364,54 +313,43 @@ function getMimeType(url, extension) {
         'opus': 'audio/opus'
     };
 
-    // Bilinen MIME type varsa onu döndür
     const knownMimeType = videoMimeTypes[extension] || audioMimeTypes[extension];
     if (knownMimeType) {
         return knownMimeType;
     }
 
-    // Bilinmeyen URL'ler için akıllı tahmin
-    // IPTV servisleri genellikle HLS kullanır
     if (url.includes(':8080') || url.includes('/live/') || url.includes('/stream/')) {
         return 'application/x-mpegURL';
     }
 
-    // Varsayılan olarak MP4 döndür (Video.js çoğu formatı otomatik algılar)
     return 'video/mp4';
 }
 
-// Dokunmatik olay dinleyicileri için değişkenler
 let touchStartX = 0;
-let touchStartY = 0; // Başlangıç dikey konumunu kaydetmek için
+let touchStartY = 0;
 let touchEndX = 0;
 let touchEndY = 0;
 let touchStartTime = 0;
-const swipeThreshold = 50; // Kaydırma hareketi için minimum mesafe (piksel)
-const tapThreshold = 10; // Dokunma için maksimum hareket mesafesi (piksel)
-const doubleTapThreshold = 300; // Çift dokunma için maksimum süre (ms)
+const swipeThreshold = 50;
+const tapThreshold = 10;
+const doubleTapThreshold = 300;
 let lastTapTime = 0;
 
-// Ses ayarlama için eklenecek değişkenler
 let initialVolume = 0;
 let isVolumeDragging = false;
-const volumeDragThreshold = 5; // Ses ayarlama hareketini başlatmak için minimum dikey mesafe
+const volumeDragThreshold = 5;
 
-const videoPlayerElement = player.el(); // Video.js oynatıcı elementini al
+const videoPlayerElement = player.el();
 
-// Fullscreen event listeners to remove sliding animation during fullscreen transitions
 player.on('fullscreenchange', () => {
     if (player.isFullscreen()) {
-        // Entering fullscreen - disable margin-left transition
         body.classList.add('fullscreen-transition');
     } else {
-        // Exiting fullscreen - re-enable margin-left transition after a brief delay
         setTimeout(() => {
             body.classList.remove('fullscreen-transition');
-        }, 50); // Small delay to ensure fullscreen exit is complete
+        }, 50);
     }
 });
-
-// Video oynatıcı event listeners
 
 function updateToggleHandleVisibility() {
     if (window.innerWidth <= 768) {
@@ -432,17 +370,14 @@ updateToggleHandleVisibility();
 
 window.addEventListener('resize', updateToggleHandleVisibility);
 
-// Arama optimizasyonu için debounce
 let searchTimeout;
-const SEARCH_DELAY = 300; // 300ms gecikme
+const SEARCH_DELAY = 300;
 
 searchInput.addEventListener('input', (event) => {
     const searchTerm = event.target.value.toLowerCase();
 
-    // Önceki timeout'u temizle
     clearTimeout(searchTimeout);
 
-    // Yeni timeout ayarla
     searchTimeout = setTimeout(() => {
         performSearch(searchTerm);
     }, SEARCH_DELAY);
@@ -450,11 +385,9 @@ searchInput.addEventListener('input', (event) => {
 
 function performSearch(searchTerm) {
     if (!searchTerm) {
-        // Arama terimi boşsa tüm kanalları göster
         allChannelItems.forEach(item => {
             item.style.display = '';
         });
-        // Grup başlıklarını da göster
         const groupHeaders = playlistElement.querySelectorAll('.group-header');
         groupHeaders.forEach(header => {
             header.style.display = '';
@@ -462,7 +395,6 @@ function performSearch(searchTerm) {
         return;
     }
 
-    // Büyük listeler için batch processing
     if (allChannelItems.length > 1000) {
         performSearchOptimized(searchTerm);
     } else {
@@ -479,7 +411,6 @@ function performSearchNormal(searchTerm) {
 
         item.style.display = isVisible ? '' : 'none';
 
-        // Görünür kanalların gruplarını takip et
         if (isVisible) {
             const groupHeader = findGroupHeader(item);
             if (groupHeader) {
@@ -488,7 +419,6 @@ function performSearchNormal(searchTerm) {
         }
     });
 
-    // Grup başlıklarını güncelle
     updateGroupHeadersVisibility(visibleGroups);
 }
 
@@ -518,10 +448,8 @@ function performSearchOptimized(searchTerm) {
         processedCount = endIndex;
 
         if (processedCount < allChannelItems.length) {
-            // Bir sonraki batch'i planla
             requestAnimationFrame(processBatch);
         } else {
-            // Arama tamamlandı, grup başlıklarını güncelle
             updateGroupHeadersVisibility(visibleGroups);
         }
     }
@@ -557,7 +485,7 @@ window.addEventListener('mousemove', (event) => {
                              event.clientY >= toggleHandleRect.top && event.clientY <= toggleHandleRect.bottom;
 
         if (!body.classList.contains('playlist-visible')) {
-            if (isNearLeftEdge || isOverHandle) { // Kenara yakınsa VEYA çentik üzerindeyse göster
+            if (isNearLeftEdge || isOverHandle) {
                 playlistToggleHandle.style.opacity = '1';
                 playlistToggleHandle.style.pointerEvents = 'auto';
             } else {
@@ -595,45 +523,37 @@ window.addEventListener('touchstart', (event) => {
 });
 
 videoPlayerElement.addEventListener('touchstart', (event) => {
-    if (event.touches.length === 1) { // Tek parmak dokunuşu
+    if (event.touches.length === 1) {
         touchStartX = event.changedTouches[0].clientX;
         touchStartY = event.changedTouches[0].clientY;
         touchStartTime = new Date().getTime();
-        initialVolume = player.volume(); // Dokunma başladığında sesi kaydet
-        isVolumeDragging = false; // Ses ayarlama bayrağını sıfırla
-        event.preventDefault(); // Varsayılan kaydırma davranışını engellemek isteyebiliriz
+        initialVolume = player.volume();
+        isVolumeDragging = false;
+        event.preventDefault();
     }
 });
 
 videoPlayerElement.addEventListener('touchmove', (event) => {
-    if (event.touches.length === 1) { // Tek parmak dokunuşu
+    if (event.touches.length === 1) {
         const currentTouchY = event.touches[0].clientY;
-        const deltaY = currentTouchY - touchStartY; // Dikey hareket miktarı
-        const deltaX = event.changedTouches[0].clientX - touchStartX; // Yatay hareket miktarı
+        const deltaY = currentTouchY - touchStartY;
+        const deltaX = event.changedTouches[0].clientX - touchStartX;
 
-        // Ses ayarlama hareketinin başlayıp başlamadığını kontrol et
         if (!isVolumeDragging && Math.abs(deltaY) > volumeDragThreshold && Math.abs(deltaY) > Math.abs(deltaX)) {
              isVolumeDragging = true;
-             // Opsiyonel: İlk kaydırmadan sonra varsayılan davranışı engelle
-             // event.preventDefault();
         }
 
         if (isVolumeDragging) {
-            event.preventDefault(); // Ses ayarlama sırasında varsayılan kaydırmayı engelle
+            event.preventDefault();
 
             const playerHeight = videoPlayerElement.clientHeight;
-            // Dikey hareket miktarına göre ses değişimini hesapla
-            // Yukarı kaydırma (deltaY negatif) sesi artırır, aşağı (deltaY pozitif) azaltır.
-            // playerHeight boyunca yapılan kaydırma sesi tam olarak 0'dan 1'e veya tam tersi değiştirmeli.
             const volumeChange = -deltaY / playerHeight;
 
             let newVolume = initialVolume + volumeChange;
 
-            // Ses seviyesini 0 ile 1 arasında sınırla
             newVolume = Math.max(0, Math.min(1, newVolume));
 
             player.volume(newVolume);
-            // console.log('Ses seviyesi ayarlandı:', newVolume.toFixed(2)); // Hata ayıklama için
         }
     }
 });
@@ -646,42 +566,33 @@ videoPlayerElement.addEventListener('touchend', (event) => {
     const deltaY = touchEndY - touchStartY;
     const moveDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-    // Ses ayarlama hareketi yapılmadıysa dokunma ve kaydırma hareketlerini işle
     if (!isVolumeDragging) {
-        if (moveDistance < tapThreshold) { // Bu bir dokunma olabilir
+        if (moveDistance < tapThreshold) {
             const currentTime = new Date().getTime();
             const timeSinceLastTap = currentTime - lastTapTime;
 
             if (timeSinceLastTap <= doubleTapThreshold) {
-                // Çift dokunma algılandı
                 console.log('Çift dokunma algılandı');
                 if (!player.paused()) {
                     player.pause();
                 } else {
                     player.play();
                 }
-                lastTapTime = 0; // Çift dokunmayı sıfırla
+                lastTapTime = 0;
             } else {
-                // Tek dokunma başlangıcı, çift dokunma için zamanı kaydet
                 lastTapTime = currentTime;
                  console.log('Tek dokunma algılandı, çift dokunma için bekleniyor');
             }
         }
 
-        // Dokunma bittiğinde kaydırma hareketi olup olmadığını kontrol et
         handleSwipeGesture();
     } else {
-        // Ses ayarlama hareketi tamamlandı
         console.log('Ses ayarlama tamamlandı.');
-        isVolumeDragging = false; // Bayrağı sıfırla
-        // initialVolume = player.volume(); // Yeni başlangıç sesini kaydet (isteğe bağlı)
+        isVolumeDragging = false;
     }
-
-    // event.preventDefault(); // Varsayılan davranışı engellemek isteyebiliriz
 });
 
 function handleSwipeGesture() {
-    // Sadece tam ekran modunda swipe'a izin ver
     if (!player.isFullscreen()) {
         console.log('Tam ekran değil, swipe devre dışı');
         return;
@@ -690,7 +601,6 @@ function handleSwipeGesture() {
     const deltaX = touchEndX - touchStartX;
     const deltaY = touchEndY - touchStartY;
 
-    // Tam ekran modunda swipe'a izin ver
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
         if (deltaX > 0) {
             console.log('Sağa Kaydırma (Tam Ekran) - Önceki Kanal');
@@ -702,14 +612,12 @@ function handleSwipeGesture() {
     }
 }
 
-// Kanal değiştirme fonksiyonları
 function playNextChannel() {
     console.log('Sonraki kanal oynatılıyor...');
     if (activePlaylistIndex === -1 || !playlists[activePlaylistIndex]) return;
 
     const currentChannels = playlists[activePlaylistIndex].channels;
 
-    // Eğer mevcut seçili kanal indeksi geçerli değilse, seçili elementi bul
     if (currentSelectedChannelIndex === -1) {
         const selectedItem = playlistElement.querySelector('li.selected');
         if (selectedItem) {
@@ -722,22 +630,18 @@ function playNextChannel() {
         currentSelectedChannelIndex++;
         const nextChannel = currentChannels[currentSelectedChannelIndex];
         playChannel(nextChannel.url);
-        player.play(); // Kanal değiştirmede oynatmaya devam et
+        player.play();
 
-        // Çalma listesindeki seçili öğeyi güncelle
         const previouslySelected = playlistElement.querySelector('li.selected');
         if (previouslySelected) {
             previouslySelected.classList.remove('selected');
         }
-        // allChannelItems kullanarak yeni seçili öğeyi bul ve işaretle
         const nextSelectedItem = allChannelItems.find(item => item.dataset.url === nextChannel.url);
         if (nextSelectedItem) {
             nextSelectedItem.classList.add('selected');
-            // İsteğe bağlı: Yeni seçili öğeye scroll yap
             nextSelectedItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        // Son seçili kanalı kaydet
         saveLastSelectedChannel();
 
     } else {
@@ -751,7 +655,6 @@ function playPreviousChannel() {
 
     const currentChannels = playlists[activePlaylistIndex].channels;
 
-    // Eğer mevcut seçili kanal indeksi geçerli değilse, seçili elementi bul
     if (currentSelectedChannelIndex === -1) {
         const selectedItem = playlistElement.querySelector('li.selected');
         if (selectedItem) {
@@ -764,22 +667,18 @@ function playPreviousChannel() {
         currentSelectedChannelIndex--;
         const previousChannel = currentChannels[currentSelectedChannelIndex];
         playChannel(previousChannel.url);
-        player.play(); // Kanal değiştirmede oynatmaya devam et
+        player.play();
 
-        // Çalma listesindeki seçili öğeyi güncelle
         const previouslySelected = playlistElement.querySelector('li.selected');
         if (previouslySelected) {
             previouslySelected.classList.remove('selected');
         }
-         // allChannelItems kullanarak yeni seçili öğeyi bul ve işaretle
-        const previousSelectedItem = allChannelItems.find(item => item.dataset.url === previousChannel.url);
+         const previousSelectedItem = allChannelItems.find(item => item.dataset.url === previousChannel.url);
         if (previousSelectedItem) {
             previousSelectedItem.classList.add('selected');
-            // İsteğe bağlı: Yeni seçili öğeye scroll yap
             previousSelectedItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        // Son seçili kanalı kaydet
         saveLastSelectedChannel();
 
     } else {
@@ -791,17 +690,13 @@ function adjustVolume(newVolume) {
     if (player) {
         player.volume(newVolume);
         console.log('Ses seviyesi ayarlandı:', newVolume);
-        // İsteğe bağlı: Kullanıcıya ses seviyesini gösteren bir UI öğesi eklenebilir
     }
 }
-
-
 
 playlistToggleHandle.addEventListener('click', () => {
     body.classList.toggle('playlist-visible');
 });
 
-// Playlist selector event listener
 playlistSelector.addEventListener('change', (event) => {
     const selectedPlaylistId = parseInt(event.target.value);
     if (selectedPlaylistId && !isNaN(selectedPlaylistId)) {
@@ -813,15 +708,12 @@ playlistSelector.addEventListener('change', (event) => {
     updatePlaylistActionButtons();
 });
 
-// Update playlist action buttons state
 function updatePlaylistActionButtons() {
     const hasSelectedPlaylist = playlists.length > 0 && activePlaylistIndex >= 0;
     renamePlaylistBtn.disabled = !hasSelectedPlaylist;
     deletePlaylistBtn.disabled = !hasSelectedPlaylist;
-    // Upload button is always enabled, so we don't disable it
 }
 
-// Modal işlevselliği
 uploadButton.addEventListener('click', () => {
     uploadModal.style.display = 'block';
 });
@@ -842,7 +734,6 @@ window.addEventListener('click', (event) => {
     }
 });
 
-// Rename playlist functionality
 renamePlaylistBtn.addEventListener('click', () => {
     const selectedPlaylistId = parseInt(playlistSelector.value);
     if (selectedPlaylistId) {
@@ -879,7 +770,6 @@ saveRenameBtn.addEventListener('click', () => {
     }
 });
 
-// Handle Enter key in rename input
 newPlaylistNameInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         saveRenameBtn.click();
@@ -890,7 +780,6 @@ function clearRenameModal() {
     newPlaylistNameInput.value = '';
 }
 
-// Delete playlist functionality
 deletePlaylistBtn.addEventListener('click', () => {
     const selectedPlaylistId = parseInt(playlistSelector.value);
     if (selectedPlaylistId) {
@@ -905,28 +794,24 @@ deletePlaylistBtn.addEventListener('click', () => {
     }
 });
 
-// Rename playlist function
 function renamePlaylist(playlistId, newName) {
     const playlist = playlists.find(p => p.id === playlistId);
     if (playlist) {
         playlist.name = newName;
 
-        // Update the option text in selector with truncation
         const option = playlistSelector.querySelector(`option[value="${playlistId}"]`);
         if (option) {
-            // Playlist ismini kısalt (maksimum 25 karakter + ellipsis)
             let displayName = newName;
             if (displayName.length > 25) {
                 displayName = displayName.substring(0, 22) + '...';
             }
 
             option.textContent = displayName;
-            option.title = newName; // Tam ismi tooltip olarak göster
+            option.title = newName;
         }
 
         console.log(`Playlist renamed to: ${newName}`);
 
-        // localStorage'e kaydet
         savePlaylistsToStorage();
     }
 }
@@ -938,16 +823,13 @@ function clearModalInputs() {
     textInput.value = '';
 }
 
-// Dosya yükleme
 fileUpload.addEventListener('change', (event) => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
 
     if (files.length === 1) {
-        // Tek dosya yükleme
         handleSingleFile(files[0]);
     } else {
-        // Çoklu dosya yükleme
         handleMultipleFiles(files);
     }
 });
@@ -957,7 +839,6 @@ function handleSingleFile(file) {
     const playlistName = playlistNameInput.value.trim() || file.name.replace(/\.[^/.]+$/, "");
 
     if (isPlaylistFile(fileExtension)) {
-        // Playlist dosyası
         const reader = new FileReader();
         reader.onload = (e) => {
             const content = e.target.result;
@@ -967,7 +848,6 @@ function handleSingleFile(file) {
         };
         reader.readAsText(file);
     } else {
-        // Diğer tüm dosyaları medya dosyası olarak işle
         const url = URL.createObjectURL(file);
         const channels = [{
             name: file.name.replace(/\.[^/.]+$/, ""),
@@ -989,7 +869,6 @@ function handleSingleFile(file) {
         uploadModal.style.display = 'none';
         clearModalInputs();
 
-        // localStorage'e kaydet
         savePlaylistsToStorage();
     }
 }
@@ -1000,7 +879,6 @@ function handleMultipleFiles(files) {
 
     files.forEach(file => {
         const fileExtension = getFileExtension(file.name);
-        // Playlist dosyaları hariç tüm dosyaları medya dosyası olarak işle
         if (!isPlaylistFile(fileExtension)) {
             const url = URL.createObjectURL(file);
             channels.push({
@@ -1026,16 +904,12 @@ function handleMultipleFiles(files) {
         uploadModal.style.display = 'none';
         clearModalInputs();
 
-        // localStorage'e kaydet
         savePlaylistsToStorage();
     } else {
         alert('Seçilen dosyalar arasında medya dosyası bulunamadı (sadece playlist dosyaları seçilmiş).');
     }
 }
 
-
-
-// URL yükleme
 loadUrlButton.addEventListener('click', async () => {
     const url = urlInput.value.trim();
     if (!url) {
@@ -1043,7 +917,6 @@ loadUrlButton.addEventListener('click', async () => {
         return;
     }
 
-    // URL protokol kontrolü
     if (!isValidUrl(url)) {
         alert('Geçersiz URL formatı! URL http:// veya https:// ile başlamalıdır.\n\nÖrnekler:\n• http://example.com/playlist.m3u8\n• https://example.com/stream.mp4\n• http://192.168.1.100:8080/stream');
         return;
@@ -1051,13 +924,11 @@ loadUrlButton.addEventListener('click', async () => {
 
     const playlistName = playlistNameInput.value.trim() || `URL Playlist ${playlistCounter + 1}`;
 
-    // Önce playlist dosyası olarak deneyelim
     try {
         let fetchUrl = url;
 
-        // CORS sorunu için proxy kullan (sadece gerektiğinde)
         const corsProxies = [
-            '', // Önce direkt dene
+            '',
             'https://api.allorigins.win/raw?url=',
             'https://corsproxy.io/?'
         ];
@@ -1068,31 +939,28 @@ loadUrlButton.addEventListener('click', async () => {
         for (const proxy of corsProxies) {
             try {
                 fetchUrl = proxy + encodeURIComponent(url);
-                if (proxy === '') fetchUrl = url; // İlk deneme direkt URL
+                if (proxy === '') fetchUrl = url;
 
                 response = await fetch(fetchUrl);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 content = await response.text();
-                break; // Başarılı olursa döngüden çık
+                break;
             } catch (proxyError) {
                 console.log(`Proxy ${proxy || 'direct'} failed:`, proxyError.message);
                 if (proxy === corsProxies[corsProxies.length - 1]) {
-                    throw proxyError; // Son proxy da başarısız olursa hatayı fırlat
+                    throw proxyError;
                 }
-                continue; // Sonraki proxy'yi dene
+                continue;
             }
         }
 
-        // İçerik playlist formatında mı kontrol et
         if (content.includes('#EXTINF') || content.includes('#EXT-X-') ||
             content.includes('[playlist]') || content.includes('<playlist') ||
             content.includes('<asx') || content.includes('FILE ')) {
-            // Playlist dosyası olarak işle
             addNewPlaylist(playlistName, content);
         } else {
-            // Direkt streaming URL'si olarak işle
             const channels = [{
                 name: playlistName,
                 url: url,
@@ -1111,7 +979,6 @@ loadUrlButton.addEventListener('click', async () => {
             addPlaylistToSelector(playlist);
             switchToPlaylist(playlists.length - 1);
 
-            // localStorage'e kaydet
             savePlaylistsToStorage();
         }
 
@@ -1119,10 +986,8 @@ loadUrlButton.addEventListener('click', async () => {
         clearModalInputs();
 
     } catch (error) {
-        // Fetch başarısız olursa, direkt streaming URL'si olarak işle
         console.log('URL fetch başarısız, direkt streaming URL olarak işleniyor:', error.message);
 
-        // CORS hatası için özel mesaj
         if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
             console.log('CORS hatası algılandı, URL direkt streaming linki olarak ekleniyor');
         }
@@ -1147,21 +1012,17 @@ loadUrlButton.addEventListener('click', async () => {
         uploadModal.style.display = 'none';
         clearModalInputs();
 
-        // localStorage'e kaydet
         savePlaylistsToStorage();
 
-        // Kullanıcıya bilgi ver
         alert(`URL eklendi! Not: URL'ye erişim sağlanamadı (CORS kısıtlaması), bu nedenle direkt streaming linki olarak eklendi. Eğer bu bir playlist dosyası ise, dosyayı indirip yükleyebilirsiniz.`);
     }
 });
 
-// URL input real-time validation
 urlInput.addEventListener('input', (event) => {
     const url = event.target.value.trim();
     const loadButton = loadUrlButton;
 
     if (!url) {
-        // Boş input
         loadButton.disabled = false;
         loadButton.style.opacity = '1';
         loadButton.title = '';
@@ -1170,13 +1031,11 @@ urlInput.addEventListener('input', (event) => {
     }
 
     if (isValidUrl(url)) {
-        // Geçerli URL
         loadButton.disabled = false;
         loadButton.style.opacity = '1';
         loadButton.title = '';
         event.target.style.borderColor = '#555';
     } else {
-        // Geçersiz URL
         loadButton.disabled = true;
         loadButton.style.opacity = '0.5';
         loadButton.title = 'Geçerli bir HTTP/HTTPS URL\'si girin';
@@ -1184,19 +1043,16 @@ urlInput.addEventListener('input', (event) => {
     }
 });
 
-// Text input real-time validation
 textInput.addEventListener('input', (event) => {
     const content = event.target.value.trim();
     const loadButton = loadTextButton;
 
     if (!content) {
-        // Boş input
         loadButton.disabled = true;
         loadButton.style.opacity = '0.5';
         loadButton.title = 'Playlist içeriği girin';
         event.target.style.borderColor = '#555';
     } else {
-        // İçerik var
         loadButton.disabled = false;
         loadButton.style.opacity = '1';
         loadButton.title = '';
@@ -1204,7 +1060,6 @@ textInput.addEventListener('input', (event) => {
     }
 });
 
-// Text input yükleme
 loadTextButton.addEventListener('click', () => {
     const content = textInput.value.trim();
     if (!content) {
@@ -1223,11 +1078,6 @@ loadTextButton.addEventListener('click', () => {
     }
 });
 
-
-
-
-
-// Playlist yönetimi fonksiyonları
 function addNewPlaylist(name, content) {
     playlistCounter++;
     const playlist = {
@@ -1240,48 +1090,39 @@ function addNewPlaylist(name, content) {
     addPlaylistToSelector(playlist);
     switchToPlaylist(playlists.length - 1);
 
-    // localStorage'e kaydet
     savePlaylistsToStorage();
 }
 
 function parsePlaylistContent(content, filename = '') {
     const extension = getFileExtension(filename);
 
-    // M3U/M3U8 format
     if (extension === 'm3u' || extension === 'm3u8' || content.includes('#EXTINF') || content.includes('#EXT-X-')) {
         return parseM3uContent(content, false);
     }
 
-    // PLS format
     if (extension === 'pls' || content.includes('[playlist]')) {
         return parsePlsContent(content);
     }
 
-    // XSPF format
     if (extension === 'xspf' || content.includes('<playlist')) {
         return parseXspfContent(content);
     }
 
-    // JSON format
     if (extension === 'json') {
         return parseJsonContent(content);
     }
 
-    // ASX format
     if (extension === 'asx' || content.includes('<asx')) {
         return parseAsxContent(content);
     }
 
-    // CUE format
     if (extension === 'cue' || content.includes('FILE ')) {
         return parseCueContent(content);
     }
 
-    // Fallback to M3U parser
     return parseM3uContent(content, false);
 }
 
-// PLS format parser
 function parsePlsContent(content) {
     const lines = content.split('\n');
     const channels = [];
@@ -1314,7 +1155,6 @@ function parsePlsContent(content) {
         }
     }
 
-    // Convert to channels array
     Object.keys(currentEntry).forEach(key => {
         const entry = currentEntry[key];
         if (entry.url) {
@@ -1331,7 +1171,6 @@ function parsePlsContent(content) {
     return channels;
 }
 
-// XSPF format parser
 function parseXspfContent(content) {
     const channels = [];
     try {
@@ -1362,13 +1201,11 @@ function parseXspfContent(content) {
     return channels;
 }
 
-// JSON format parser
 function parseJsonContent(content) {
     const channels = [];
     try {
         const data = JSON.parse(content);
 
-        // Handle different JSON structures
         let items = [];
         if (Array.isArray(data)) {
             items = data;
@@ -1403,7 +1240,6 @@ function parseJsonContent(content) {
     return channels;
 }
 
-// ASX format parser
 function parseAsxContent(content) {
     const channels = [];
     try {
@@ -1434,7 +1270,6 @@ function parseAsxContent(content) {
     return channels;
 }
 
-// CUE format parser
 function parseCueContent(content) {
     const channels = [];
     const lines = content.split('\n');
@@ -1475,7 +1310,6 @@ function parseCueContent(content) {
         }
     }
 
-    // Add last track
     if (currentTrack && currentFile) {
         channels.push({
             name: currentTrack.title || `Track ${currentTrack.number}`,
@@ -1493,14 +1327,13 @@ function addPlaylistToSelector(playlist) {
     const option = document.createElement('option');
     option.value = playlist.id;
 
-    // Playlist ismini kısalt (maksimum 25 karakter + ellipsis)
     let displayName = playlist.name;
     if (displayName.length > 25) {
         displayName = displayName.substring(0, 22) + '...';
     }
 
     option.textContent = displayName;
-    option.title = playlist.name; // Tam ismi tooltip olarak göster
+    option.title = playlist.name;
     playlistSelector.appendChild(option);
     updatePlaylistActionButtons();
 }
@@ -1509,14 +1342,11 @@ function removePlaylist(playlistId) {
     const index = playlists.findIndex(p => p.id === playlistId);
     if (index === -1) return;
 
-    // Option'ı kaldır
     const option = playlistSelector.querySelector(`option[value="${playlistId}"]`);
     if (option) option.remove();
 
-    // Playlist'i kaldır
     playlists.splice(index, 1);
 
-    // Aktif playlist'i güncelle
     if (activePlaylistIndex === index) {
         if (playlists.length > 0) {
             const newIndex = Math.min(index, playlists.length - 1);
@@ -1531,7 +1361,6 @@ function removePlaylist(playlistId) {
 
     updatePlaylistActionButtons();
 
-    // localStorage'e kaydet
     savePlaylistsToStorage();
 }
 
@@ -1539,27 +1368,22 @@ function switchToPlaylist(index) {
     if (index < 0 || index >= playlists.length) return;
 
     activePlaylistIndex = index;
-    currentSelectedChannelIndex = -1; // Playlist değiştiğinde seçili kanal indeksini sıfırla
+    currentSelectedChannelIndex = -1;
     playlistSelector.value = playlists[index].id;
     displayChannels(playlists[index].channels);
     updatePlaylistActionButtons();
 
-    // localStorage'e kaydet
     savePlaylistsToStorage();
 }
 
-
-
 function parseM3uContent(content, shouldDisplay = true) {
-    // İçerik tek satırda olabilir, önce düzgün formata çevirelim
     let normalizedContent = content;
 
-    // Eğer içerik tek satırda ise, #EXTINF etiketlerinden önce satır sonu ekle
     if (!content.includes('\n') && content.includes('#EXTINF')) {
         normalizedContent = content
             .replace(/#EXTINF/g, '\n#EXTINF')
             .replace(/http/g, '\nhttp')
-            .replace(/^[\s\n]+/, '') // Başındaki boşlukları temizle
+            .replace(/^[\s\n]+/, '')
             .trim();
     }
 
@@ -1570,7 +1394,7 @@ function parseM3uContent(content, shouldDisplay = true) {
     for (const line of lines) {
         const trimmedLine = line.trim();
 
-        if (!trimmedLine) continue; // Boş satırları atla
+        if (!trimmedLine) continue;
 
         if (trimmedLine.startsWith('#EXTINF:')) {
             const match = trimmedLine.match(/#EXTINF:(-?\d+)(.*?),(.*)/);
@@ -1583,13 +1407,11 @@ function parseM3uContent(content, shouldDisplay = true) {
                     group: 'Genel'
                 };
 
-                // Grup bilgisini çıkar
                 const groupMatch = currentChannel.attributes.match(/group-title="([^"]*?)"/);
                 if (groupMatch) {
                     currentChannel.group = groupMatch[1];
                 }
 
-                // Eğer grup bilgisi yoksa, köşeli parantez içindeki bilgiyi kullan
                 if (!groupMatch) {
                     const bracketMatch = currentChannel.attributes.match(/\[([^\]]*?)\]/);
                     if (bracketMatch) {
@@ -1615,13 +1437,11 @@ function parseM3uContent(content, shouldDisplay = true) {
     return channels;
 }
 
-// Performans optimizasyonu için global değişkenler
 let isRenderingChannels = false;
 let renderQueue = [];
-const BATCH_SIZE = 50; // Her seferde render edilecek kanal sayısı
+const BATCH_SIZE = 50;
 
 function displayChannels(channels) {
-    // Eğer zaten render işlemi devam ediyorsa, yeni isteği kuyruğa ekle
     if (isRenderingChannels) {
         renderQueue.push(channels);
         return;
@@ -1639,7 +1459,6 @@ function displayChannels(channels) {
         return;
     }
 
-    // Büyük kanal listesi için optimizasyon
     if (channels.length > 1000) {
         displayChannelsOptimized(channels);
     } else {
@@ -1650,7 +1469,6 @@ function displayChannels(channels) {
 function displayChannelsOptimized(channels) {
     isRenderingChannels = true;
 
-    // Loading göstergesi ekle
     const loadingItem = document.createElement('li');
     loadingItem.textContent = `${channels.length} kanal yükleniyor...`;
     loadingItem.style.color = '#4a9eff';
@@ -1668,26 +1486,21 @@ function displayChannelsOptimized(channels) {
         return groups;
     }, {});
 
-    // Loading göstergesini kaldır
     playlistElement.removeChild(loadingItem);
 
     let firstChannelItem = null;
     let processedCount = 0;
 
-    // Tüm kanalları düz bir liste haline getir (grup bilgisi ile birlikte)
     const flatChannels = [];
     for (const group in groupedChannels) {
         if (groupedChannels.hasOwnProperty(group)) {
-            // Grup başlığı ekle
             flatChannels.push({ type: 'group', name: group });
-            // Grup kanallarını ekle
             groupedChannels[group].forEach(channel => {
                 flatChannels.push({ type: 'channel', data: channel });
             });
         }
     }
 
-    // Batch processing ile kanalları render et
     function renderBatch() {
         let batchCount = 0;
 
@@ -1695,14 +1508,12 @@ function displayChannelsOptimized(channels) {
             const item = flatChannels[processedCount];
 
             if (item.type === 'group') {
-                // Grup başlığı oluştur
                 const groupHeader = document.createElement('li');
                 groupHeader.classList.add('group-header');
                 groupHeader.textContent = item.name;
                 groupHeader.dataset.group = item.name;
                 playlistElement.appendChild(groupHeader);
             } else if (item.type === 'channel') {
-                // Kanal elementi oluştur
                 const channel = item.data;
                 const listItem = createChannelElement(channel);
 
@@ -1713,25 +1524,21 @@ function displayChannelsOptimized(channels) {
                     firstChannelItem = listItem;
                 }
 
-                batchCount++; // Sadece kanallar için batch sayısını artır
+                batchCount++;
             }
 
             processedCount++;
         }
 
-        // Progress göstergesi güncelle
         if (processedCount < flatChannels.length) {
-            // Bir sonraki batch'i requestAnimationFrame ile planla
             requestAnimationFrame(() => {
-                setTimeout(renderBatch, 0); // UI'ı bloklamadan devam et
+                setTimeout(renderBatch, 0);
             });
         } else {
-            // Render tamamlandı
             finishChannelRendering(firstChannelItem);
         }
     }
 
-    // İlk batch'i başlat
     renderBatch();
 }
 
@@ -1773,16 +1580,13 @@ function createChannelElement(channel) {
     listItem.dataset.url = channel.url;
     listItem.classList.add('channel-item');
 
-    // Kanal ismi için span
     const channelName = document.createElement('span');
     channelName.textContent = channel.name;
     channelName.classList.add('channel-name');
 
-    // Buton konteyner
     const buttonContainer = document.createElement('div');
     buttonContainer.classList.add('channel-buttons');
 
-    // Düzenleme butonu
     const editButton = document.createElement('button');
     editButton.innerHTML = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1792,7 +1596,6 @@ function createChannelElement(channel) {
     editButton.classList.add('channel-btn', 'edit-btn');
     editButton.title = 'Kanal ismini düzenle';
 
-    // Silme butonu
     const deleteButton = document.createElement('button');
     deleteButton.innerHTML = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1814,7 +1617,6 @@ function createChannelElement(channel) {
 function finishChannelRendering(firstChannelItem) {
     isRenderingChannels = false;
 
-    // Event delegation kullanarak tek listener ekle
     if (!playlistElement.hasAttribute('data-events-attached')) {
         playlistElement.addEventListener('click', handleChannelClick);
         playlistElement.setAttribute('data-events-attached', 'true');
@@ -1830,26 +1632,22 @@ function finishChannelRendering(firstChannelItem) {
         }
     }
 
-    // Son seçili kanalı geri yükle
     setTimeout(() => {
         restoreLastSelectedChannel();
     }, 100);
 
-    // Kuyruktaki render isteklerini işle
     if (renderQueue.length > 0) {
         const nextChannels = renderQueue.shift();
         displayChannels(nextChannels);
     }
 }
 
-// Event delegation ile optimize edilmiş click handler
 function handleChannelClick(event) {
     const target = event.target;
     const listItem = target.closest('.channel-item');
 
     if (!listItem) return;
 
-    // Edit button
     if (target.closest('.edit-btn')) {
         event.stopPropagation();
         const channelName = listItem.querySelector('.channel-name');
@@ -1857,7 +1655,6 @@ function handleChannelClick(event) {
         return;
     }
 
-    // Delete button
     if (target.closest('.delete-btn')) {
         event.stopPropagation();
         const channelUrl = listItem.dataset.url;
@@ -1870,7 +1667,6 @@ function handleChannelClick(event) {
         return;
     }
 
-    // Channel selection
     if (!target.classList.contains('channel-btn')) {
         const previouslySelected = playlistElement.querySelector('li.selected');
         if (previouslySelected) {
@@ -1906,8 +1702,7 @@ function handleChannelClick(event) {
 
 function playChannel(url, shouldMute = false) {
     if (player) {
-        // URL'den dosya uzantısını al
-        const urlParts = url.split('?')[0]; // Query parametrelerini kaldır
+        const urlParts = url.split('?')[0];
         const extension = getFileExtension(urlParts);
         const mimeType = getMimeType(url, extension);
 
@@ -1922,7 +1717,6 @@ function playChannel(url, shouldMute = false) {
              player.muted(true);
         }
 
-        // HLS ve DASH desteği kontrolü
         if (mimeType === 'application/x-mpegURL' && !videojs.Html5Hlsjs) {
              console.warn("Video.js HLS desteğini bulamadı. Lütfen videojs-contrib-hls eklentisini kontrol edin.");
         }
@@ -1930,14 +1724,11 @@ function playChannel(url, shouldMute = false) {
         if (mimeType === 'application/dash+xml' && !videojs.Html5Dashjs) {
              console.warn("Video.js DASH desteğini bulamadı. Lütfen videojs-contrib-dash eklentisini kontrol edin.");
         }
-
-        // Otomatik oynatma kapatıldı - player.play() kaldırıldı
     } else {
         console.error("Video.js oynatıcı nesnesi bulunamadı.");
     }
 }
 
-// Drag & Drop desteği
 document.addEventListener('dragover', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1967,23 +1758,17 @@ document.addEventListener('drop', (e) => {
     }
 });
 
-// Sayfa yüklendiğinde localStorage'den verileri yükle
 window.addEventListener('load', () => {
-    // Animasyonları devre dışı bırak
     body.classList.add('no-transition');
 
-    // Playlist görünürlüğünü varsayılan olarak ayarla
     body.classList.add('playlist-visible');
 
-    // Kısa bir süre sonra animasyonları tekrar etkinleştir
     setTimeout(() => {
         body.classList.remove('no-transition');
     }, 100);
 
-    // Önce localStorage'den verileri yükle
     const hasStoredData = loadPlaylistsFromStorage();
 
-    // Eğer localStorage'de veri yoksa varsayılan playlist'i yükle
     if (!hasStoredData && defaultM3uUrl) {
         console.log('Varsayılan M3U URL yükleniyor:', defaultM3uUrl);
         fetch(defaultM3uUrl)
@@ -2009,20 +1794,11 @@ window.addEventListener('load', () => {
         console.log('localStorage\'den playlist verileri yüklendi.');
     }
 
-    updatePlaylistActionButtons(); // Initialize button states
+    updatePlaylistActionButtons();
 });
 
-// Pencere boyutu değiştiğinde mobil boyuta girilirse playlisti görünür yap
 window.addEventListener('resize', () => {
      if (window.innerWidth <= 768 && !body.classList.contains('playlist-visible')) {
         body.classList.add('playlist-visible');
-    } /*else if (window.innerWidth > 768 && body.classList.contains('playlist-visible')) {
-        // Eğer masaüstü boyuta dönülürse ve playlist açıksa,
-        // masaüstü varsayılan durumuna göre davranması için sınıfı kaldırabiliriz.
-        // Ancak mobil deneyimi bozmamak adına bu kısmı şimdilik opsiyonel tutuyorum.
-        // body.classList.remove('playlist-visible');
-        // updateToggleHandleVisibility(); // Masaüstü handle görünürlüğünü güncelle
-    }*/
+    }
 });
-
-
