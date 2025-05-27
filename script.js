@@ -22,12 +22,16 @@ const playlistSelector = document.getElementById('playlist-selector');
 
 const renamePlaylistBtn = document.getElementById('rename-playlist-btn');
 const deletePlaylistBtn = document.getElementById('delete-playlist-btn');
+const infoButton = document.getElementById('info-button');
 
 const renameModal = document.getElementById('rename-modal');
 const closeRenameModal = document.querySelector('.close-rename');
 const newPlaylistNameInput = document.getElementById('new-playlist-name');
 const saveRenameBtn = document.getElementById('save-rename-btn');
 const cancelRenameBtn = document.getElementById('cancel-rename-btn');
+
+const infoModal = document.getElementById('info-modal');
+const closeInfoModal = document.querySelector('.close-info');
 
 let allChannelItems = [];
 
@@ -352,7 +356,13 @@ player.on('fullscreenchange', () => {
 });
 
 function updateToggleHandleVisibility() {
-    if (window.innerWidth <= 768) {
+    const isMobilePortrait = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+
+    if (isMobilePortrait) {
+        // Mobil dikey durumda toggle handle'ı gizle
+        playlistToggleHandle.style.opacity = '0';
+        playlistToggleHandle.style.pointerEvents = 'none';
+    } else if (window.innerWidth <= 768) {
         playlistToggleHandle.style.opacity = '1';
         playlistToggleHandle.style.pointerEvents = 'auto';
     } else {
@@ -476,7 +486,9 @@ function updateGroupHeadersVisibility(visibleGroups) {
 }
 
 window.addEventListener('mousemove', (event) => {
-    if (window.innerWidth > 768) {
+    const isMobilePortrait = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+
+    if (window.innerWidth > 768 && !isMobilePortrait) {
         const mouseX = event.clientX;
         const toggleHandleRect = playlistToggleHandle.getBoundingClientRect();
 
@@ -500,7 +512,9 @@ window.addEventListener('mousemove', (event) => {
 });
 
 window.addEventListener('touchstart', (event) => {
-     if (window.innerWidth > 768 && event.touches.length > 0) {
+    const isMobilePortrait = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+
+    if (window.innerWidth > 768 && !isMobilePortrait && event.touches.length > 0) {
         const touchX = event.touches[0].clientX;
         const toggleHandleRect = playlistToggleHandle.getBoundingClientRect();
 
@@ -694,7 +708,12 @@ function adjustVolume(newVolume) {
 }
 
 playlistToggleHandle.addEventListener('click', () => {
-    body.classList.toggle('playlist-visible');
+    // Mobil dikey durumda toggle handle'ı devre dışı bırak
+    const isMobilePortrait = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+
+    if (!isMobilePortrait) {
+        body.classList.toggle('playlist-visible');
+    }
 });
 
 playlistSelector.addEventListener('change', (event) => {
@@ -716,21 +735,29 @@ function updatePlaylistActionButtons() {
 
 uploadButton.addEventListener('click', () => {
     uploadModal.style.display = 'block';
+    showCursor(); // Modal açıldığında cursor'u göster
 });
 
 closeModal.addEventListener('click', () => {
     uploadModal.style.display = 'none';
     clearModalInputs();
+    hideCursor(); // Modal kapandığında cursor'u gizle
 });
 
 window.addEventListener('click', (event) => {
     if (event.target === uploadModal) {
         uploadModal.style.display = 'none';
         clearModalInputs();
+        hideCursor(); // Modal kapandığında cursor'u gizle
     }
     if (event.target === renameModal) {
         renameModal.style.display = 'none';
         clearRenameModal();
+        hideCursor(); // Modal kapandığında cursor'u gizle
+    }
+    if (event.target === infoModal) {
+        infoModal.style.display = 'none';
+        hideCursor(); // Modal kapandığında cursor'u gizle
     }
 });
 
@@ -741,6 +768,7 @@ renamePlaylistBtn.addEventListener('click', () => {
         if (playlist) {
             newPlaylistNameInput.value = playlist.name;
             renameModal.style.display = 'block';
+            showCursor(); // Modal açıldığında cursor'u göster
             newPlaylistNameInput.focus();
             newPlaylistNameInput.select();
         }
@@ -750,11 +778,13 @@ renamePlaylistBtn.addEventListener('click', () => {
 closeRenameModal.addEventListener('click', () => {
     renameModal.style.display = 'none';
     clearRenameModal();
+    hideCursor(); // Modal kapandığında cursor'u gizle
 });
 
 cancelRenameBtn.addEventListener('click', () => {
     renameModal.style.display = 'none';
     clearRenameModal();
+    hideCursor(); // Modal kapandığında cursor'u gizle
 });
 
 saveRenameBtn.addEventListener('click', () => {
@@ -765,8 +795,10 @@ saveRenameBtn.addEventListener('click', () => {
         renamePlaylist(selectedPlaylistId, newName);
         renameModal.style.display = 'none';
         clearRenameModal();
+        hideCursor(); // Modal kapandığında cursor'u gizle
     } else {
         alert('Lütfen geçerli bir playlist adı girin.');
+        returnFocusToPlaylist();
     }
 });
 
@@ -779,6 +811,28 @@ newPlaylistNameInput.addEventListener('keypress', (event) => {
 function clearRenameModal() {
     newPlaylistNameInput.value = '';
 }
+
+// Hata sonrası focus'u playlist'e döndüren yardımcı fonksiyon
+function returnFocusToPlaylist() {
+    setTimeout(() => {
+        focusArea = 'playlist';
+        const selectedChannel = playlistElement.querySelector('li.selected');
+        if (selectedChannel) {
+            selectedChannel.focus();
+        }
+    }, 100);
+}
+
+// Info Modal Event Listeners
+infoButton.addEventListener('click', () => {
+    infoModal.style.display = 'block';
+    showCursor(); // Modal açıldığında cursor'u göster
+});
+
+closeInfoModal.addEventListener('click', () => {
+    infoModal.style.display = 'none';
+    hideCursor(); // Modal kapandığında cursor'u gizle
+});
 
 deletePlaylistBtn.addEventListener('click', () => {
     const selectedPlaylistId = parseInt(playlistSelector.value);
@@ -907,6 +961,7 @@ function handleMultipleFiles(files) {
         savePlaylistsToStorage();
     } else {
         alert('Seçilen dosyalar arasında medya dosyası bulunamadı (sadece playlist dosyaları seçilmiş).');
+        returnFocusToPlaylist();
     }
 }
 
@@ -914,11 +969,13 @@ loadUrlButton.addEventListener('click', async () => {
     const url = urlInput.value.trim();
     if (!url) {
         alert('Lütfen bir URL girin.');
+        returnFocusToPlaylist();
         return;
     }
 
     if (!isValidUrl(url)) {
         alert('Geçersiz URL formatı! URL http:// veya https:// ile başlamalıdır.\n\nÖrnekler:\n• http://example.com/playlist.m3u8\n• https://example.com/stream.mp4\n• http://192.168.1.100:8080/stream');
+        returnFocusToPlaylist();
         return;
     }
 
@@ -1015,6 +1072,7 @@ loadUrlButton.addEventListener('click', async () => {
         savePlaylistsToStorage();
 
         alert(`URL eklendi! Not: URL'ye erişim sağlanamadı (CORS kısıtlaması), bu nedenle direkt streaming linki olarak eklendi. Eğer bu bir playlist dosyası ise, dosyayı indirip yükleyebilirsiniz.`);
+        returnFocusToPlaylist();
     }
 });
 
@@ -1064,6 +1122,7 @@ loadTextButton.addEventListener('click', () => {
     const content = textInput.value.trim();
     if (!content) {
         alert('Lütfen playlist içeriğini girin.');
+        returnFocusToPlaylist();
         return;
     }
 
@@ -1075,6 +1134,7 @@ loadTextButton.addEventListener('click', () => {
         clearModalInputs();
     } catch (error) {
         alert(`Playlist işlenirken hata oluştu: ${error.message}`);
+        returnFocusToPlaylist();
     }
 });
 
@@ -1760,8 +1820,18 @@ document.addEventListener('drop', (e) => {
 
 window.addEventListener('load', () => {
     body.classList.add('no-transition');
-
     body.classList.add('playlist-visible');
+
+    // TV Mode için cursor'u başlangıçta gizle
+    body.classList.add('hide-cursor');
+
+    // Focus'u playlist'te bırak
+    focusArea = 'playlist';
+
+    const selectedChannel = playlistElement.querySelector('li.selected');
+    if (selectedChannel) {
+        selectedChannel.focus();
+    }
 
     setTimeout(() => {
         body.classList.remove('no-transition');
@@ -1798,7 +1868,229 @@ window.addEventListener('load', () => {
 });
 
 window.addEventListener('resize', () => {
-     if (window.innerWidth <= 768 && !body.classList.contains('playlist-visible')) {
+    const isMobilePortrait = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+
+    if (isMobilePortrait) {
+        // Mobil dikey durumda kanal listesini hep görünür tut ve focus'u playlist'te bırak
+        body.classList.add('playlist-visible');
+        focusArea = 'playlist';
+    } else if (window.innerWidth <= 768 && !body.classList.contains('playlist-visible')) {
         body.classList.add('playlist-visible');
     }
 });
+
+let isFullscreen = false;
+
+document.addEventListener('fullscreenchange', function() {
+    isFullscreen = !!document.fullscreenElement;
+});
+
+const VOLUME_STEP = 5;
+const VOLUME_MIN = 0;
+const VOLUME_MAX = 100;
+
+let focusArea = 'playlist';
+let lastNavigationTime = 0;
+const NAVIGATION_DELAY = 1;
+
+// TV Mode - Mouse cursor management
+let mouseTimer;
+const MOUSE_HIDE_DELAY = 3000; // 3 saniye sonra cursor gizle
+
+function showCursor() {
+    body.classList.remove('hide-cursor');
+    clearTimeout(mouseTimer);
+
+    // 3 saniye sonra cursor'u gizle
+    mouseTimer = setTimeout(() => {
+        body.classList.add('hide-cursor');
+    }, MOUSE_HIDE_DELAY);
+}
+
+function hideCursor() {
+    body.classList.add('hide-cursor');
+    clearTimeout(mouseTimer);
+}
+
+// Mouse hareket algılama
+document.addEventListener('mousemove', showCursor);
+document.addEventListener('mousedown', showCursor);
+document.addEventListener('mouseup', showCursor);
+
+// Klavye kullanımında cursor'u gizle
+document.addEventListener('keydown', hideCursor);
+
+document.addEventListener('keydown', function(event) {
+    // Mobil dikey durumda sağ-sol tuşlarını devre dışı bırak
+    const isMobilePortrait = window.innerWidth <= 768 && window.innerHeight > window.innerWidth;
+
+    if (!document.fullscreenElement && !isMobilePortrait) {
+        switch(event.key) {
+            case 'ArrowLeft':
+                if (focusArea === 'player') {
+                    focusArea = 'playlist';
+                    showPlaylist();
+                    const selectedChannel = playlistElement.querySelector('li.selected');
+                    if (selectedChannel) {
+                        selectedChannel.focus();
+                    }
+                }
+                break;
+
+            case 'ArrowRight':
+                if (focusArea === 'playlist') {
+                    focusArea = 'player';
+                    hidePlaylist();
+                    player.focus();
+                }
+                break;
+        }
+    }
+
+    switch(event.key) {
+        case 'f':
+        case 'F':
+            if (!isFullscreen) {
+                player.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+            break;
+        case 'ArrowUp':
+            if (event.ctrlKey) {
+                adjustVolume('up');
+                event.preventDefault();
+            } else if (isFullscreen) {
+                navigateAndPlayChannel('up');
+            } else {
+                navigateChannelList('up');
+            }
+            break;
+        case 'ArrowDown':
+            if (event.ctrlKey) {
+                adjustVolume('down');
+                event.preventDefault();
+            } else if (isFullscreen) {
+                navigateAndPlayChannel('down');
+            } else {
+                navigateChannelList('down');
+            }
+            break;
+        case 'Enter':
+            const selectedChannel = playlistElement.querySelector('li.selected');
+            if (selectedChannel) {
+                selectedChannel.click();
+            }
+            break;
+        case ' ':
+            if (player.paused()) {
+                player.play();
+            } else {
+                player.pause();
+            }
+            break;
+        case 'm':
+        case 'M':
+            player.muted(!player.muted());
+            break;
+    }
+});
+
+function findNextPlayableChannel(currentIndex, channels, direction) {
+    let newIndex = currentIndex;
+
+    do {
+        if (direction === 'up') {
+            newIndex = newIndex <= 0 ? channels.length - 1 : newIndex - 1;
+        } else {
+            newIndex = newIndex >= channels.length - 1 ? 0 : newIndex + 1;
+        }
+    } while (channels[newIndex].classList.contains('category-header') ||
+             channels[newIndex].classList.contains('group-header') ||
+             channels[newIndex].classList.contains('group-header selected'));
+
+    return newIndex;
+}
+
+function navigateChannelList(direction) {
+    const currentTime = Date.now();
+    if (currentTime - lastNavigationTime < NAVIGATION_DELAY) {
+        return;
+    }
+    lastNavigationTime = currentTime;
+
+    const allItems = Array.from(playlistElement.querySelectorAll('li'));
+    const currentIndex = allItems.findIndex(item => item.classList.contains('selected'));
+
+    if (currentIndex === -1) {
+        const firstPlayable = allItems.findIndex(item => !item.classList.contains('category-header'));
+        if (firstPlayable !== -1) {
+            allItems[firstPlayable].classList.add('selected');
+            allItems[firstPlayable].scrollIntoView({ behavior: 'auto', block: 'center' });
+        }
+        return;
+    }
+
+    const newIndex = findNextPlayableChannel(currentIndex, allItems, direction);
+
+    allItems.forEach(item => item.classList.remove('selected'));
+    allItems[newIndex].classList.add('selected');
+    allItems[newIndex].scrollIntoView({ behavior: 'auto', block: 'center' });
+}
+
+function navigateAndPlayChannel(direction) {
+    const allItems = Array.from(playlistElement.querySelectorAll('li'));
+    const currentIndex = allItems.findIndex(item => item.classList.contains('selected'));
+
+    if (currentIndex === -1) return;
+
+    const newIndex = findNextPlayableChannel(currentIndex, allItems, direction);
+
+    allItems.forEach(item => item.classList.remove('selected'));
+    allItems[newIndex].classList.add('selected');
+    allItems[newIndex].click();
+}
+
+function adjustVolume(direction) {
+    let currentVolume = player.volume() * 100;
+
+    if (direction === 'up') {
+        currentVolume = Math.min(currentVolume + VOLUME_STEP, VOLUME_MAX);
+    } else {
+        currentVolume = Math.max(currentVolume - VOLUME_STEP, VOLUME_MIN);
+    }
+
+    player.volume(currentVolume / 100);
+
+    showVolumeIndicator(currentVolume);
+}
+
+function showPlaylist() {
+    const playlist = document.getElementById('playlist');
+    playlist.style.transform = 'translateX(0)';
+    playlist.style.opacity = '1';
+    document.body.classList.add('playlist-visible');
+}
+
+function hidePlaylist() {
+    const playlist = document.getElementById('playlist');
+    playlist.style.transform = 'translateX(-100%)';
+    playlist.style.opacity = '0';
+    document.body.classList.remove('playlist-visible');
+}
+
+function showVolumeIndicator(volume) {
+    const existingIndicator = document.querySelector('.volume-indicator');
+    if (existingIndicator) {
+        existingIndicator.remove();
+    }
+
+    const indicator = document.createElement('div');
+    indicator.className = 'volume-indicator';
+    indicator.textContent = `Ses: ${Math.round(volume)}%`;
+    document.body.appendChild(indicator);
+
+    setTimeout(() => {
+        indicator.remove();
+    }, 2000);
+}
