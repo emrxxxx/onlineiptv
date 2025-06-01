@@ -338,7 +338,7 @@ function enableChannelNameEdit(listItem, channelNameSpan) {
 function checkStorageAndCookies() {
     try {
         // Sabit versiyon numarası - sadece yeni deployment ile değişir
-        const DEPLOYED_VERSION = '1.0.3';
+        const DEPLOYED_VERSION = '1.0.4';
         const lastUsedVersion = localStorage.getItem('app_version');
 
         // Sadece yeni bir deployment varsa güncelleme yap
