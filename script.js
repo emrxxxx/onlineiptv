@@ -31,7 +31,7 @@ player.on('loadedmetadata', function() {
     }
 });
 
-const defaultM3uUrl = 'https://raw.githubusercontent.com/emrxxxx/emrx/refs/heads/main/xx.m3u?token=GHSAT0AAAAAADEQWOMSX7DCKE6PU2X4T3PU2B4ET6Q';
+const defaultM3uUrl = 'https://raw.githubusercontent.com/emrxxxx/onlineiptv/refs/heads/main/xx.m3u';
 
 const playlistElement = document.querySelector('#playlist ul');
 const playlistContainer = document.getElementById('playlist');
