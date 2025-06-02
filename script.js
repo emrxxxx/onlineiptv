@@ -31,7 +31,7 @@ player.on('loadedmetadata', function() {
     }
 });
 
-const defaultM3uUrl = 'https://raw.githubusercontent.com/Ahmetgayayiyedum/ssaku/refs/heads/main/playlist1.m3u';
+const defaultM3uUrl = 'https://raw.githubusercontent.com/emrxxxx/onlineiptv/refs/heads/main/xx.m3u';
 
 const playlistElement = document.querySelector('#playlist ul');
 const playlistContainer = document.getElementById('playlist');
