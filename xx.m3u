@@ -94,6 +94,10 @@ https://tv.prectv5.sbs/live/bspremier1.m3u8
 https://tv.prectv5.sbs/live/bsturk.m3u8
 #EXTINF:-1 group-title="Sinema" ,Movie Smart Turk
 https://tv.prectv5.sbs/live/mvturk.m3u8
+#EXTINF:-1 group-title="Sinema" ,Movie Movies Action
+https://tv.prectv5.sbs/live/sinemaaksiyon.m3u8
+#EXTINF:-1 group-title="Sinema" ,Movie Movies Action
+https://tv.prectv5.sbs/live/sinemaaksiyon.m3u8
 
 #EXTINF:-1 group-title="Spor" ,TRT SPOR
 https://tv-trtspor-esdai.medya.trt.com.tr/master_720p.m3u8
@@ -117,16 +121,24 @@ https://owifavo5.rocketcdn.com/gstv/gstv.smil/master.m3u8
 #EXTINF:-1 group-title="Spor" ,beIN sport 3
 
 
-#EXTINF:-1 tvg-id="" tvg-name="National Geographic" group-title="Belgesel",National Geographic
+#EXTINF:-1 tvg-name="National Geographic" group-title="Belgesel",National Geographic
 https://saran-live.ercdn.net/natgeohd/index.m3u8
-#EXTINF:-1 tvg-id="" tvg-name="National Geographic Wild" group-title="Belgesel",National Geographic Wild
+#EXTINF:-1 tvg-name="National Geographic Wild" group-title="Belgesel",National Geographic Wild
 https://saran-live.ercdn.net/natgeowild/index.m3u8
-#EXTINF:-1 tvg-id="" tvg-name="BBC Earth" group-title="Belgesel",BBC Earth
+#EXTINF:-1 tvg-name="Love Nature" group-title="Belgesel",Love Nature
+https://tv.prectv5.sbs/live/lovenature.m3u8
+#EXTINF:-1 tvg-name="BBC Earth" group-title="Belgesel",BBC Earth
 https://tv.prectv5.sbs/live/bbc.m3u8
-#EXTINF:-1 tvg-id="" tvg-name="Viasat Nature" group-title="Belgesel",Viasat Explore
+#EXTINF:-1 group-title="Belgesel",Discovery Channel
+https://tv.prectv5.sbs/live/discovery.m3u8
+#EXTINF:-1 tvg-name="BBC Earth" group-title="Belgesel",Discovery Science
+https://tv.prectv5.sbs/live/discs.m3u8
+#EXTINF:-1 tvg-name="Viasat Nature" group-title="Belgesel",Viasat Explore
 https://tv.prectv5.sbs/live/viasatexplore.m3u8
 #EXTINF:-1 group-title="Belgesel" ,TRT Belgesel
 https://tv-trtbelgesel.medya.trt.com.tr/master_720.m3u8
+#EXTINF:-1 group-title="Belgesel" ,Tarih TV
+https://tv.prectv5.sbs/live/tarihtv.m3u8
 
 #EXTINF:-1 group-title="Müzik" ,Kral Pop
 https://dogus-live.daioncdn.net/kralpoptv/kralpoptv_720p.m3u8
