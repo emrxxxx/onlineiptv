@@ -111,11 +111,11 @@ http://stream.tvcdn.net/spor/fb-tv.m3u8
 https://owifavo5.rocketcdn.com/gstv/gstv.smil/master.m3u8
 
 #EXTINF:-1 group-title="Spor" ,beIN sport 1
-https://b.fulltvizle.com/bein/tracks-v1a1/mono.m3u8
+
 #EXTINF:-1 group-title="Spor" ,beIN sport 2
-https://b.fulltvizle.com/bein2/tracks-v1a1/mono.m3u8
+
 #EXTINF:-1 group-title="Spor" ,beIN sport 3
-https://b.fulltvizle.com/bein3/tracks-v1a1/mono.m3u8
+
 
 #EXTINF:-1 tvg-id="" tvg-name="National Geographic" group-title="Belgesel",National Geographic
 https://saran-live.ercdn.net/natgeohd/index.m3u8
