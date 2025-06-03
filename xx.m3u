@@ -96,6 +96,8 @@ https://tv.prectv5.sbs/live/sinemaaksiyon.m3u8
 https://tv.prectv5.sbs/live/bsturk.m3u8
 #EXTINF:-1 group-title="Sinema" ,Movie Smart Turk
 https://tv.prectv5.sbs/live/mvturk.m3u8
+#EXTINF:-1 group-title="Sinema" ,FX
+https://saran-live.ercdn.net/fx/index.m3u8
 
 #EXTINF:-1 group-title="Spor" ,TRT SPOR
 https://tv-trtspor-esdai.medya.trt.com.tr/master_720p.m3u8
@@ -112,12 +114,18 @@ http://stream.tvcdn.net/spor/fb-tv.m3u8
 #EXTINF:-1 group-title="Spor" ,GS TV
 https://owifavo5.rocketcdn.com/gstv/gstv.smil/master.m3u8
 
-#EXTINF:-1 group-title="Spor" ,beIN sport 1
-
-#EXTINF:-1 group-title="Spor" ,beIN sport 2
-
-#EXTINF:-1 group-title="Spor" ,beIN sport 3
-
+#EXTINF:-1 group-title="Spor" ,beIN sports 1
+https://verceldeneme-one.vercel.app/api/proxy.js?url=https://lll.istekbet3.tv/yayinzirve.m3u8&referer=https://monotv523.com/
+#EXTINF:-1 group-title="Spor" ,beIN sports 2
+https://verceldeneme-one.vercel.app/api/proxy.js?url=https://lll.istekbet3.tv/yayinb2.m3u8&referer=https://monotv523.com/
+#EXTINF:-1 group-title="Spor" ,beIN sports 3
+https://verceldeneme-one.vercel.app/api/proxy.js?url=https://lll.istekbet3.tv/yayinb3.m3u8&referer=https://monotv523.com/
+#EXTINF:-1 group-title="Spor" ,beIN sports 4
+https://verceldeneme-one.vercel.app/api/proxy.js?url=https://lll.istekbet3.tv/yayinb4.m3u8&referer=https://monotv523.com/
+#EXTINF:-1 group-title="Spor" ,beIN sports 5
+https://verceldeneme-one.vercel.app/api/proxy.js?url=https://lll.istekbet3.tv/yayinb5.m3u8&referer=https://monotv523.com/
+#EXTINF:-1 group-title="Spor" ,beIN sports Max
+https://verceldeneme-one.vercel.app/api/proxy.js?url=https://lll.istekbet3.tv/yayinbm1.m3u8&referer=https://monotv523.com/
 
 #EXTINF:-1 tvg-name="National Geographic" group-title="Belgesel",National Geographic
 https://saran-live.ercdn.net/natgeohd/index.m3u8
@@ -131,6 +139,8 @@ https://tv.prectv5.sbs/live/bbc.m3u8
 https://tv.prectv5.sbs/live/discovery.m3u8
 #EXTINF:-1 tvg-name="BBC Earth" group-title="Belgesel",Discovery Science
 https://tv.prectv5.sbs/live/discs.m3u8
+#EXTINF:-1 tvg-name="Viasat Nature" group-title="Belgesel",Viasat History
+https://kerimmkirac-dproxy.hf.space/proxy/m3u?url=https://vavoo.to/play/1335130209/index.m3u8
 #EXTINF:-1 tvg-name="Viasat Nature" group-title="Belgesel",Viasat Explore
 https://tv.prectv5.sbs/live/viasatexplore.m3u8
 #EXTINF:-1 group-title="Belgesel" ,TRT Belgesel
