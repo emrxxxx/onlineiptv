@@ -31,7 +31,7 @@ player.on('loadedmetadata', function() {
     }
 });
 
-const defaultM3uUrl = 'https://raw.githubusercontent.com/emrxxxx/onlineiptv/refs/heads/main/xx.m3u';
+const defaultM3uUrl = 'https://raw.githubusercontent.com/emrcxcx/test/refs/heads/main/test.m3u';
 
 const playlistElement = document.querySelector('#playlist ul');
 const playlistContainer = document.getElementById('playlist');
@@ -338,7 +338,7 @@ function enableChannelNameEdit(listItem, channelNameSpan) {
 function checkStorageAndCookies() {
     try {
         // Sabit versiyon numarası - sadece yeni deployment ile değişir
-        const DEPLOYED_VERSION = '1.0.5';
+        const DEPLOYED_VERSION = '1.0.6';
         const lastUsedVersion = localStorage.getItem('app_version');
 
         // Sadece yeni bir deployment varsa güncelleme yap
