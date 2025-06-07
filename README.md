@@ -3,14 +3,9 @@
 
 [emrxxxx.github.io/onlineiptv](https://emrxxxx.github.io/onlineiptv/)
 
-## 🛠️ Sürekli Gelişim Aşamasında
 
-Bu proje hâlâ **aktif olarak geliştirilmektedir**.  
-Yeni özellikler, optimizasyonlar ve geri bildirimlere dayalı düzenlemeler zamanla eklenecektir.
+## Bu proje hâlâ **aktif olarak geliştirilmektedir**.  
 
----
-
-> 💬 Fikirlerin ve katkıların benim için değerli.  
 > Projeye PR (pull request) göndermekten, issue açmaktan çekinme.
 
 ## 📝 Lisans
