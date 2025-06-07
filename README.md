@@ -4,7 +4,3 @@
 Projeye PR (pull request) göndermekten, issue açmaktan çekinme.
 
 [emrxxxx.github.io/onlineiptv](https://emrxxxx.github.io/onlineiptv/)
-
-## 📝 Lisans
-
-Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
