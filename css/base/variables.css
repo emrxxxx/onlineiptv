@@ -1,0 +1,44 @@
+/* CSS Custom Properties - Tüm değişkenler */
+:root {
+    /* Renk Paleti */
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #2a2a2a;
+    --bg-tertiary: #252525;
+    --bg-dark: #1a1a1a;
+    
+    /* Metin Renkleri */
+    --text-primary: #f4f4f4;
+    --text-secondary: #e0e0e0;
+    --text-muted: #d0d0d0;
+    --text-disabled: #888;
+    
+    /* Kenarlık Renkleri */
+    --border-color: #333;
+    --border-hover: #555;
+    
+    /* Vurgu Renkleri */
+    --accent-blue: #4a9eff;
+    --accent-blue-hover: #357abd;
+    --accent-green: #4caf50;
+    --accent-red: #ff6b6b;
+    
+    /* Gölge Efektleri */
+    --shadow-light: rgba(0, 0, 0, 0.3);
+    --shadow-heavy: rgba(0, 0, 0, 0.5);
+    
+    /* Geçiş Efektleri */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    
+    /* Boyutlar */
+    --border-radius: 6px;
+    --border-radius-small: 4px;
+    --playlist-width: 300px;
+    
+    /* Z-Index Değerleri */
+    --z-playlist: 1000;
+    --z-toggle-handle: 1001;
+    --z-modal: 2000;
+    --z-drag-overlay: 9999;
+    --z-volume-indicator: 100000;
+}
