@@ -1,0 +1,285 @@
+/* Animations - Animasyon stilleri */
+
+/* Keyframe Animasyonları */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideInUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes slideInDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes slideOutLeft {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+}
+
+@keyframes slideOutUp {
+    from { transform: translateY(0); }
+    to { transform: translateY(-100%); }
+}
+
+@keyframes slideOutDown {
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+@keyframes scaleOut {
+    from { transform: scale(1); }
+    to { transform: scale(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+    40%, 43% { transform: translateY(-10px); }
+    70% { transform: translateY(-5px); }
+    90% { transform: translateY(-2px); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes progress-bar-stripes {
+    from { background-position: 1rem 0; }
+    to { background-position: 0 0; }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes modalFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+/* Animasyon Sınıfları */
+.animate-fade-in {
+    animation: fadeIn var(--transition-normal) ease-out;
+}
+
+.animate-fade-out {
+    animation: fadeOut var(--transition-normal) ease-in;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft var(--transition-normal) ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight var(--transition-normal) ease-out;
+}
+
+.animate-slide-in-up {
+    animation: slideInUp var(--transition-normal) ease-out;
+}
+
+.animate-slide-in-down {
+    animation: slideInDown var(--transition-normal) ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn var(--transition-normal) ease-out;
+}
+
+.animate-scale-out {
+    animation: scaleOut var(--transition-normal) ease-in;
+}
+
+.animate-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.animate-bounce {
+    animation: bounce 1s ease-in-out;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Loading Animasyonları */
+.loading-item {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Hover Animasyonları */
+.hover-scale:hover {
+    transform: scale(1.05);
+    transition: transform var(--transition-fast);
+}
+
+.hover-scale-sm:hover {
+    transform: scale(1.02);
+    transition: transform var(--transition-fast);
+}
+
+.hover-scale-lg:hover {
+    transform: scale(1.1);
+    transition: transform var(--transition-fast);
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    transition: transform var(--transition-fast);
+    box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+.hover-rotate:hover {
+    transform: rotate(5deg);
+    transition: transform var(--transition-fast);
+}
+
+.hover-rotate-90:hover {
+    transform: rotate(90deg);
+    transition: transform var(--transition-fast);
+}
+
+/* Geçiş Efektleri */
+.transition-all {
+    transition: all var(--transition-normal);
+}
+
+.transition-fast {
+    transition: all var(--transition-fast);
+}
+
+.transition-slow {
+    transition: all 0.5s ease;
+}
+
+.transition-transform {
+    transition: transform var(--transition-normal);
+}
+
+.transition-opacity {
+    transition: opacity var(--transition-normal);
+}
+
+.transition-colors {
+    transition: background-color var(--transition-normal), 
+                color var(--transition-normal), 
+                border-color var(--transition-normal);
+}
+
+/* Animasyon Kontrolleri */
+.animation-paused {
+    animation-play-state: paused;
+}
+
+.animation-running {
+    animation-play-state: running;
+}
+
+.animation-delay-1 {
+    animation-delay: 0.1s;
+}
+
+.animation-delay-2 {
+    animation-delay: 0.2s;
+}
+
+.animation-delay-3 {
+    animation-delay: 0.3s;
+}
+
+.animation-delay-4 {
+    animation-delay: 0.4s;
+}
+
+.animation-delay-5 {
+    animation-delay: 0.5s;
+}
+
+/* Performans Optimizasyonu */
+.will-change-transform {
+    will-change: transform;
+}
+
+.will-change-opacity {
+    will-change: opacity;
+}
+
+.will-change-auto {
+    will-change: auto;
+}
+
+/* GPU Hızlandırma */
+.gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}

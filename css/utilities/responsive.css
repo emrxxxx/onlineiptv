@@ -1,0 +1,351 @@
+/* Responsive - Responsive tasarım stilleri */
+
+/* Breakpoint Değerleri */
+/* 
+  xs: 0px
+  sm: 576px
+  md: 768px
+  lg: 992px
+  xl: 1200px
+  xxl: 1400px
+*/
+
+/* Mobile First Approach */
+
+/* Extra Small devices (phones, less than 576px) */
+@media (max-width: 575.98px) {
+    .container {
+        padding: 0;
+    }
+    
+    .modal-content {
+        margin: 5% auto;
+        width: 95%;
+        max-width: none;
+    }
+    
+    .info-modal-content {
+        margin: 10% auto;
+        width: 95%;
+        max-width: none;
+    }
+    
+    .info-modal-body {
+        padding: 15px;
+    }
+    
+    .shortcuts-section h4 {
+        font-size: 0.85rem;
+    }
+    
+    .shortcut-item .key {
+        min-width: 50px;
+        font-size: 0.75rem;
+        padding: 3px 6px;
+    }
+    
+    .shortcut-item .description {
+        font-size: 0.8rem;
+        margin-left: 8px;
+    }
+
+    /* Channel icons on mobile */
+    .channel-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 6px;
+    }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+    .keyboard-shortcuts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (max-width: 768px) {
+    .container {
+        padding: 0;
+    }
+
+    /* Portrait Orientation */
+    @media (orientation: portrait) {
+        .main-content {
+            flex-direction: column;
+            padding: 5px;
+        }
+
+        .video-js {
+            width: 100%;
+            height: calc(50vh - 15px);
+            margin: 0 0 10px;
+            order: 1;
+        }
+
+        body.playlist-visible .main-content .video-js {
+            margin-left: 0;
+        }
+
+        #playlist {
+            width: 100%;
+            position: static;
+            height: calc(50vh - 25px);
+            transform: none;
+            opacity: 1;
+            margin: 5px 0 30px;
+            order: 2;
+        }
+
+        body.playlist-visible #playlist {
+            transform: none;
+            opacity: 1;
+        }
+
+        #playlist-toggle-handle {
+            display: none;
+        }
+
+        .modal {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            margin: 0;
+            border-radius: 0;
+            top: -55px;
+            left: 0;
+        }
+
+        .modal-content {
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+    }
+
+    /* Landscape Orientation */
+    @media (orientation: landscape) {
+        .main-content {
+            flex-direction: row;
+            padding: 5px;
+        }
+
+        .video-js {
+            flex: 1;
+            height: calc(100vh - 65px);
+            margin: 0;
+            order: 2;
+        }
+
+        body.playlist-visible .main-content .video-js {
+            margin-left: var(--playlist-width);
+        }
+
+        body.fullscreen-transition.playlist-visible .main-content .video-js {
+            transition: none !important;
+        }
+
+        #playlist {
+            width: var(--playlist-width);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: calc(100vh - 59.9px);
+            transform: translateX(-100%);
+            opacity: 0;
+            transition: transform var(--transition-normal), opacity var(--transition-normal);
+            z-index: var(--z-playlist);
+            margin-top: 0;
+            order: 1;
+        }
+
+        body.playlist-visible #playlist {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .modal {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            margin: 0;
+            border-radius: 0;
+            top: -100px;
+            left: 0;
+        }
+
+        .modal-content {
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+    }
+    
+    .info-modal-content {
+        margin: 10% auto;
+        width: 95%;
+        max-width: none;
+    }
+
+    .info-modal-body {
+        padding: 15px;
+    }
+
+    .shortcuts-section h4 {
+        font-size: 0.85rem;
+    }
+
+    .shortcut-item .key {
+        min-width: 50px;
+        font-size: 0.75rem;
+        padding: 3px 6px;
+    }
+
+    .shortcut-item .description {
+        font-size: 0.8rem;
+        margin-left: 8px;
+    }
+}
+
+/* Mobile Landscape Özel Stilleri */
+@media (max-width: 768px) and (orientation: landscape) {
+    .info-modal-content {
+        margin: 11% auto;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .info-modal-body {
+        padding: 12px;
+    }
+
+    .keyboard-shortcuts-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+    .shortcuts-section h4 {
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+    }
+
+    .shortcut-item {
+        padding: 6px 0;
+    }
+
+    .shortcut-item .key {
+        min-width: 45px;
+        font-size: 0.7rem;
+        padding: 2px 4px;
+    }
+
+    .shortcut-item .description {
+        font-size: 0.75rem;
+        margin-left: 6px;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 769px) {
+    body.playlist-visible .main-content .video-js {
+        margin-left: var(--playlist-width);
+    }
+
+    body.fullscreen-transition.playlist-visible .main-content .video-js {
+        transition: none !important;
+    }
+
+    #playlist-toggle-handle {
+        display: flex;
+    }
+
+    .keyboard-shortcuts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .keyboard-shortcuts-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+}
+
+/* Responsive Utility Classes */
+
+/* Display */
+.d-none { display: none; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+.d-grid { display: grid; }
+
+@media (max-width: 575.98px) {
+    .d-xs-none { display: none; }
+    .d-xs-block { display: block; }
+    .d-xs-flex { display: flex; }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .d-sm-none { display: none; }
+    .d-sm-block { display: block; }
+    .d-sm-flex { display: flex; }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .d-md-none { display: none; }
+    .d-md-block { display: block; }
+    .d-md-flex { display: flex; }
+}
+
+@media (min-width: 992px) {
+    .d-lg-none { display: none; }
+    .d-lg-block { display: block; }
+    .d-lg-flex { display: flex; }
+}
+
+/* Text Alignment */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+@media (max-width: 767.98px) {
+    .text-sm-left { text-align: left; }
+    .text-sm-center { text-align: center; }
+    .text-sm-right { text-align: right; }
+}
+
+@media (min-width: 768px) {
+    .text-md-left { text-align: left; }
+    .text-md-center { text-align: center; }
+    .text-md-right { text-align: right; }
+}
+
+/* Flex Direction */
+@media (max-width: 767.98px) {
+    .flex-sm-column { flex-direction: column; }
+    .flex-sm-row { flex-direction: row; }
+}
+
+@media (min-width: 768px) {
+    .flex-md-column { flex-direction: column; }
+    .flex-md-row { flex-direction: row; }
+}
+
+/* Width */
+.w-100 { width: 100%; }
+.w-75 { width: 75%; }
+.w-50 { width: 50%; }
+.w-25 { width: 25%; }
+
+/* Height */
+.h-100 { height: 100%; }
+.h-75 { height: 75%; }
+.h-50 { height: 50%; }
+.h-25 { height: 25%; }
