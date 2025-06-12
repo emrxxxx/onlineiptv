@@ -72,7 +72,7 @@ window.addEventListener('load', () => {
 
         console.log('localStorage\'den playlist verileri yüklendi.');
     } else if (DEFAULT_M3U_URL) {
-        loadDefaultPlaylist(DEFAULT_M3U_URL);
+        loadDefaultPlaylist(DEFAULT_M3U_URL, true);
     }
 
     updatePlaylistActionButtons();
