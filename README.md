@@ -4,7 +4,7 @@ Aktif olarak geliştirilmektedir.
 
 Playlist için [@kerimmkirac](https://github.com/kerimmkirac) 'a teşekkürler.
 
-Kendi kanal listenizi eklediyseniz gerekirse aşağıdaki proxy yönlendirmesini kullanabilirsiniz
+Kendi kanal listenizi eklediyseniz gerekirse aşağıdaki proxy yönlendirmesini kullanabilirsiniz, şu an deneme aşamasındadır.
 
 Örnek: https://emrxxxx-tv-p.hf.space/proxy?url=BURAYA_SİZİN_M3U8
 
