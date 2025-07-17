@@ -12,3 +12,5 @@ Bilinen sorunlar:
  - Listeye Google Drive, dropbox vb. yerlerdeki playlistler eklenemiyor.
  - Gruplandırılmamış m3u listesi eklenmiyor.
  - Açılan modallar bazı telefonlarda büyük gözüküyor, eski telefonlarda kasma yapıyor.
+
+Not: Varsayılan kanal listesi çalışmıyorsa kanal listesini silip sayfayı yenileyin.
