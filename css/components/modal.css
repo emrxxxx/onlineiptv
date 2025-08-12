@@ -1,0 +1,288 @@
+/* Modal - Modal dialog stilleri */
+
+/* Ana Modal Container */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: var(--z-modal);
+    left: 0;
+    top: -130px;
+    width: 100%;
+    height: 100%;
+}
+
+/* Modal İçerik */
+.modal-content {
+    background-color: var(--bg-secondary);
+    margin: 15% auto;
+    border-radius: 8px;
+    width: 85%;
+    max-width: 420px;
+    height: auto;
+    min-height: auto;
+    box-shadow: 0 4px 20px var(--shadow-heavy);
+}
+
+/* Info Modal Özel Stilleri */
+.info-modal-content {
+    max-width: 500px;
+    width: 90%;
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 18px;
+    border-bottom: 1px solid var(--border-hover);
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+/* Kapatma Butonu */
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: color var(--transition-fast);
+}
+
+.close:hover {
+    color: var(--text-primary);
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 18px;
+}
+
+.info-modal-body {
+    padding: 20px;
+}
+
+/* Modal Buttons */
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 15px 18px;
+    border-top: 1px solid var(--border-hover);
+}
+
+.modal-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--border-radius-small);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color var(--transition-normal);
+}
+
+/* Özel Modal Butonları */
+#save-rename-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+#save-rename-btn:hover {
+    background-color: #0056b3;
+}
+
+#cancel-rename-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+#cancel-rename-btn:hover {
+    background-color: #545b62;
+}
+
+/* Keyboard Shortcuts Grid */
+.keyboard-shortcuts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.shortcuts-section h4 {
+    margin: 0 0 12px 0;
+    color: var(--accent-blue);
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 6px;
+}
+
+.shortcut-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shortcut-item:last-child {
+    border-bottom: none;
+}
+
+.shortcut-item .key {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: 4px 8px;
+    border-radius: var(--border-radius-small);
+    font-family: monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    min-width: 60px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.shortcut-item .description {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    flex: 1;
+    margin-left: 12px;
+}
+
+/* Modal Overlay Efekti */
+.modal::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: -1;
+}
+
+/* Modal Animasyonları */
+.modal.show {
+    display: block;
+    animation: modalFadeIn var(--transition-normal) ease-out;
+}
+
+.modal.hide {
+    animation: modalFadeOut var(--transition-normal) ease-in;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes modalFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+/* Mobil Responsive Stilleri */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 10vh auto;
+        width: 90%;
+        max-width: 300px;
+        height: auto;
+    }
+
+    /* Rename modal için özel küçük boyut */
+    #rename-modal .modal-content {
+        margin: 15vh auto;
+        width: 85%;
+        max-width: 280px;
+        height: auto;
+    }
+
+    .modal-header {
+        padding: 12px 15px;
+    }
+
+    .modal-header h3 {
+        font-size: 1rem;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .modal-buttons {
+        padding: 12px 15px;
+        gap: 8px;
+    }
+
+    .modal-buttons button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    /* Input alanları mobilde daha küçük */
+    .modal input[type="text"] {
+        font-size: 0.9rem;
+        padding: 8px 10px;
+    }
+
+    /* Close button mobilde daha küçük */
+    .close {
+        font-size: 24px;
+    }
+}
+
+/* Çok küçük ekranlar için */
+@media (max-width: 480px) {
+    .modal-content {
+        margin: 8vh auto;
+        width: 95%;
+        max-width: 260px;
+        height: auto;
+    }
+
+    #rename-modal .modal-content {
+        margin: 12vh auto;
+        width: 90%;
+        max-width: 240px;
+        height: auto;
+    }
+
+    .modal-header {
+        padding: 10px 12px;
+    }
+
+    .modal-header h3 {
+        font-size: 0.9rem;
+    }
+
+    .modal-body {
+        padding: 12px;
+    }
+
+    .modal-buttons {
+        padding: 10px 12px;
+        gap: 6px;
+    }
+
+    .modal-buttons button {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+}

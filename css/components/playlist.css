@@ -1,0 +1,488 @@
+/* Playlist - Playlist panel stilleri */
+
+/* Ana Playlist Container */
+#playlist {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--playlist-width);
+    height: 100vh;
+    background-color: var(--bg-dark);
+    z-index: var(--z-playlist);
+    padding: 15px;
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 1px solid var(--border-color);
+
+    /* Hızlı scroll optimizasyonları */
+    scroll-behavior: auto; /* smooth yerine auto - çok daha hızlı */
+    -webkit-overflow-scrolling: touch;
+    will-change: scroll-position;
+    contain: layout style paint;
+    overscroll-behavior: contain; /* Bounce efektini sınırla */
+    scroll-snap-type: none; /* Snap'i devre dışı bırak */
+}
+
+/* Playlist Görünürlük Durumu */
+body.playlist-visible #playlist {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Scrollbar Stilleri - Hızlı Scroll için optimize edildi */
+#playlist::-webkit-scrollbar {
+    width: 8px;
+}
+
+#playlist::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+#playlist::-webkit-scrollbar-thumb {
+    background-color: var(--border-hover);
+    border-radius: var(--border-radius-small);
+    border: 2px solid var(--bg-secondary);
+    /* Hızlı scroll için optimizasyon */
+    transition: none; /* Transition'ları kaldır */
+}
+
+#playlist::-webkit-scrollbar-thumb:hover {
+    background-color: #777;
+    /* Hover'da da transition yok */
+}
+
+/* Scrollbar için ek performans optimizasyonları */
+#playlist {
+    /* Scroll wheel hızını artır */
+    scroll-padding: 0;
+    scroll-margin: 0;
+}
+
+/* Playlist Header */
+.playlist-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+#playlist h2 {
+    margin: 0 0 15px;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+    flex: 1;
+}
+
+/* Info Button */
+.info-button-header {
+    background: var(--bg-tertiary);
+    color: var(--text-disabled);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    width: 32px;
+    height: 32px;
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+.info-button-header:hover {
+    background: var(--border-hover);
+    color: var(--accent-blue);
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.info-button-header:active {
+    background: var(--border-color);
+    transform: scale(0.95);
+}
+
+/* Playlist Selector */
+.playlist-selector-container {
+    margin-bottom: 15px;
+}
+
+.playlist-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#playlist-selector {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+    transition: all var(--transition-fast);
+    max-width: 200px;
+    min-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#playlist-selector:focus {
+    border-color: var(--border-color);
+    background-color: var(--bg-tertiary);
+    box-shadow: none;
+}
+
+#playlist-selector option {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    padding: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* Playlist Actions */
+.playlist-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.playlist-action-btn {
+    background: #444;
+    color: #777;
+    border: none;
+    border-radius: var(--border-radius-small);
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    width: 26px;
+    height: 26px;
+    opacity: 0.7;
+}
+
+.playlist-action-btn:hover {
+    background: var(--border-hover);
+    color: #999;
+    opacity: 1;
+}
+
+.playlist-action-btn:active {
+    background: var(--border-color);
+}
+
+.playlist-action-btn:disabled {
+    background: var(--border-color);
+    color: var(--border-hover);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Özel Buton Hover Efektleri */
+#upload-button:hover {
+    color: var(--accent-green);
+}
+
+#upload-button:hover svg {
+    transform: rotate(90deg);
+}
+
+#rename-playlist-btn:hover {
+    color: var(--accent-blue);
+}
+
+#delete-playlist-btn:hover {
+    color: var(--accent-red);
+}
+
+/* Playlist Items */
+#playlist ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#playlist li {
+    background-color: var(--bg-tertiary);
+    border: none;
+    margin-bottom: 2px;
+    padding: 12px 10px;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border-left: 3px solid transparent;
+    will-change: transform;
+    contain: layout style;
+}
+
+#playlist li:hover {
+    background-color: #2d2d2d;
+    color: var(--text-primary);
+    border-left-color: var(--border-hover);
+}
+
+#playlist li.selected {
+    background-color: #1e3a5f;
+    color: var(--text-primary);
+    border-left-color: var(--accent-blue);
+    font-weight: 500;
+}
+
+#playlist li:focus {
+    outline: none;
+}
+
+/* Channel Items */
+#playlist li.channel-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+}
+
+.channel-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    margin-right: 8px;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.channel-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--border-radius-small);
+    margin-right: 8px;
+    flex-shrink: 0;
+    object-fit: cover;
+    background-color: var(--bg-secondary);
+    border: none;
+    transition: all var(--transition-fast);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.channel-icon:hover {
+    transform: scale(1.05);
+}
+
+.channel-icon:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Fallback icon for channels without logo */
+.channel-icon-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-hover));
+    color: white;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.channel-icon-fallback:hover {
+    background: linear-gradient(135deg, var(--accent-blue-hover), var(--accent-blue));
+}
+
+/* Loading state for channel icons */
+.channel-icon[src=""] {
+    background: var(--bg-secondary);
+    position: relative;
+}
+
+.channel-icon[src=""]:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Icon fade-in animation */
+.channel-icon {
+    opacity: 1;
+    transition: opacity var(--transition-fast);
+}
+
+.channel-icon.loaded {
+    opacity: 1;
+}
+
+.channel-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.channel-buttons {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+#playlist li.channel-item:hover .channel-buttons {
+    opacity: 1;
+}
+
+.channel-btn {
+    background: #444;
+    color: #777;
+    border: none;
+    border-radius: var(--border-radius-small);
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    width: 26px;
+    height: 26px;
+    opacity: 0.7;
+}
+
+.channel-btn:hover {
+    background: var(--border-hover);
+    color: #999;
+    opacity: 1;
+}
+
+.channel-btn:active {
+    background: var(--border-color);
+}
+
+.edit-btn:hover {
+    color: var(--accent-blue);
+}
+
+.delete-btn:hover {
+    color: var(--accent-red);
+}
+
+/* Group Headers */
+#playlist li.group-header {
+    background-color: transparent;
+    color: var(--text-disabled);
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    padding: 8px 0 8px 15px;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    cursor: default;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-left: none;
+    contain: layout style;
+}
+
+#playlist li.group-header:hover {
+    background-color: transparent;
+    color: var(--text-disabled);
+    border-left: none;
+}
+
+/* Toggle Handle */
+#playlist-toggle-handle {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 60px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: var(--z-toggle-handle);
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    transition: left var(--transition-normal);
+    box-shadow: 2px 0 5px var(--shadow-light);
+}
+
+#playlist-toggle-handle span {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-left: 2px solid var(--text-primary);
+    border-bottom: 2px solid var(--text-primary);
+    transform: rotate(225deg);
+    transition: transform var(--transition-normal);
+}
+
+body.playlist-visible #playlist-toggle-handle {
+    left: var(--playlist-width);
+}
+
+body.playlist-visible #playlist-toggle-handle span {
+    transform: rotate(45deg);
+}
+
+/* Scroll to Top Button */
+.scroll-to-top {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(74, 158, 255, 0.9);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-to-top:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-to-top svg {
+    transition: transform 0.3s ease;
+}
+
+.scroll-to-top:hover svg {
+    transform: translateY(-2px);
+}

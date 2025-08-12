@@ -1,0 +1,18 @@
+/* Ana CSS dosyası - Tüm modülleri import eder */
+@import url('./css/base/variables.css');
+@import url('./css/base/reset.css');
+@import url('./css/base/typography.css');
+@import url('./css/base/layout.css');
+
+@import url('./css/components/video-player.css');
+@import url('./css/components/playlist.css');
+@import url('./css/components/modal.css');
+@import url('./css/components/buttons.css');
+@import url('./css/components/forms.css');
+@import url('./css/components/indicators.css');
+
+@import url('./css/utilities/animations.css');
+@import url('./css/utilities/responsive.css');
+@import url('./css/utilities/helpers.css');
+
+@import url('./css/themes/dark.css');

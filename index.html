@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U Player</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P1FLNKBFWB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-P1FLNKBFWB');
+    </script>
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <link rel="stylesheet" href="main.css?v=1.1.0">
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <div id="playlist">
+                <div class="playlist-header-container">
+                    <h2>Kanal Listesi</h2>
+                    <button id="info-button" class="info-button-header" title="Kumanda tuşları bilgisi">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="playlist-selector-container">
+                    <div class="playlist-selector-wrapper">
+                        <select id="playlist-selector">
+                        </select>
+                        <div class="playlist-actions">
+                            <button id="upload-button" class="playlist-action-btn" title="Yeni playlist ekle">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                            </button>
+                            <button id="rename-playlist-btn" class="playlist-action-btn" title="Playlist adını değiştir">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                </svg>
+                            </button>
+                            <button id="delete-playlist-btn" class="playlist-action-btn" title="Playlist'i sil">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <input type="text" id="playlist-search" placeholder="Kanal ara...">
+                <ul>
+                    <!-- Kanal listesi buraya JavaScript ile eklenecek -->
+                </ul>
+
+            </div>
+            <video id="my-video" class="video-js vjs-default-skin" controls preload="auto" data-setup='{}'>
+                <p class="vjs-no-js">
+                    To view this video please enable JavaScript, and consider upgrading to a
+                    web browser that
+                    <a href="https://videojs.com/html5-video-support/" target="_blank"
+                    >supports HTML5 video</a
+                    >
+                </p>
+            </video>
+        </div>
+        <!-- Kanal listesini açıp kapatmak için çentik/buton -->
+        <div id="playlist-toggle-handle">
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Yeni Playlist Ekle</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="playlist-name" placeholder="Playlist adı (opsiyonel)">
+                <div class="upload-options">
+                    <div class="upload-option">
+                        <label for="file-upload">Dosya Yükle:</label>
+                        <input type="file" id="file-upload" multiple>
+                        <small>Çoğu dosya türleri desteklenir: Video, Audio ve Playlist dosyaları</small>
+                    </div>
+                    <div class="upload-option">
+                        <label for="url-input">URL Gir:</label>
+                        <input type="url" id="url-input" placeholder="Herhangi bir streaming URL'sini buraya yapıştırın" pattern="https?://.*">
+                        <button id="load-url">Yükle</button>
+                        <small>Çoğu streaming URL'leri desteklenir (M3U, M3U8, HLS, DASH, MP4, vb.) Şimdilik proxy ve user-agent desteği yok.</small>
+                    </div>
+                    <div class="upload-option">
+                        <label for="text-input">Playlist İçeriği Yapıştır:</label>
+                        <textarea id="text-input" placeholder="M3U, PLS veya diğer playlist içeriğini buraya yapıştırın..." rows="4"></textarea>
+                        <button id="load-text" disabled>Yükle</button>
+                        <small>Playlist içeriğini manuel olarak yapıştırabilirsiniz</small>
+
+                        <small>Sürükle bırak desteği mevcut, yüklemek için sürükleyin ve bırakın.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Playlist Modal -->
+    <div id="rename-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Playlist Adını Değiştir</h3>
+                <span class="close-rename">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="new-playlist-name" placeholder="Yeni playlist adı">
+                <div class="modal-buttons">
+                    <button id="save-rename-btn">Kaydet</button>
+                    <button id="cancel-rename-btn">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal">
+        <div class="modal-content info-modal-content">
+            <div class="modal-header">
+                <h3>Klavye/Kumanda Tuşları</h3>
+                <span class="close close-info">&times;</span>
+            </div>
+            <div class="modal-body info-modal-body">
+                <div class="keyboard-shortcuts-grid">
+                    <div class="shortcuts-section">
+                        <h4>Genel Kontroller</h4>
+                        <div class="shortcut-item">
+                            <span class="key">F</span>
+                            <span class="description">Tam ekran aç/kapat</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="key">Space</span>
+                            <span class="description">Oynat/Duraklat</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="key">M</span>
+                            <span class="description">Ses aç/kapat</span>
+                        </div>
+                    </div>
+                    <div class="shortcuts-section">
+                        <h4>Kanal Kontrolü</h4>
+                        <div class="shortcut-item">
+                            <span class="key">↑↓</span>
+                            <span class="description">Kanal seçimi</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="key">Enter</span>
+                            <span class="description">Kanalı oynat</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="key">←→</span>
+                            <span class="description">Panel geçişi</span>
+                        </div>
+                    </div>
+                    <div class="shortcuts-section">
+                        <h4>Ses Kontrolü</h4>
+                        <div class="shortcut-item">
+                            <span class="key">Ctrl + ↑</span>
+                            <span class="description">Sesi artır</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="key">Ctrl + ↓</span>
+                            <span class="description">Sesi azalt</span>
+                        </div>
+                    </div>
+                    <div class="shortcuts-section">
+                        <h5>Önemli</h5>
+                        <div class="shortcut-item">
+                            <span class="description">TV'de tarayıcıda mouse imleci aktifse kumanda tuşları çalışmaz. Farklı bir tarayıcı kullanmak veya imleci ayarlardan kapatmak faydalı olabilir.</span>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video.js JS -->
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <!-- Video.js HLS ve DASH desteği -->
+    <script src="https://cdn.jsdelivr.net/npm/@videojs/http-streaming@3.10.0/dist/videojs-http-streaming.min.js"></script>
+    <!-- Modüler JavaScript -->
+    <script type="module" src="js/main.js?v=1.1.0"></script>
+
+    <!-- Cache Temizleme -->
+    <script>
+        // Service Worker varsa kaldır
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+
+        // Sayfa kapatılırken son kontrol
+        window.addEventListener('unload', function() {
+            // Cache kontrolü
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+

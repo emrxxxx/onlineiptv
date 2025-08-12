@@ -1,0 +1,78 @@
+/* Typography - Font ve metin stilleri */
+
+body {
+    font-family: sans-serif;
+}
+
+/* Başlık Stilleri */
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+h2 {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+h3 {
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+h4 {
+    color: var(--accent-blue);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Metin Stilleri */
+p {
+    margin: 0;
+    line-height: 1.4;
+}
+
+small {
+    color: var(--text-disabled);
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+/* Monospace Font */
+.monospace,
+code,
+kbd {
+    font-family: monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Metin Yardımcı Sınıfları */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-disabled { color: var(--text-disabled); }
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.text-uppercase { text-transform: uppercase; }
+.text-lowercase { text-transform: lowercase; }
+
+.font-weight-normal { font-weight: normal; }
+.font-weight-bold { font-weight: bold; }
+
+/* Metin Taşma */
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.text-break {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}

@@ -1,0 +1,57 @@
+/* CSS Reset ve Base Stiller */
+
+/* Box Model Reset */
+* {
+    box-sizing: border-box;
+}
+
+/* Body Reset */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+/* TV Mode - Cursor gizleme */
+body.hide-cursor,
+body.hide-cursor * {
+    cursor: none !important;
+}
+
+/* Geçiş efektlerini sayfa yüklenirken devre dışı bırak */
+body.no-transition #playlist,
+body.no-transition .main-content .video-js,
+body.no-transition #playlist-toggle-handle,
+body.no-transition #playlist-toggle-handle span {
+    transition: none !important;
+}
+
+/* Focus stilleri - tüm outline'ları kaldır */
+*:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Video.js border kaldırma */
+.video-js *,
+.video-js *:focus,
+.video-js *:active,
+.video-js .vjs-control-bar,
+.video-js .vjs-big-play-button,
+.video-js .vjs-play-control,
+.video-js .vjs-volume-control,
+.video-js .vjs-progress-control,
+.video-js .vjs-time-control,
+.video-js .vjs-fullscreen-control,
+.video-js .vjs-button,
+.video-js .vjs-slider {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.video-js:focus {
+    outline: none;
+}
