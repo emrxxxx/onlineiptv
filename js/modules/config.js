@@ -26,7 +26,7 @@ export const DEPLOYED_VERSION = '1.1.0';
 export const DEFAULT_M3U_URL = 'https://raw.githubusercontent.com/emrxxxx/onlineiptv/refs/heads/main/index.m3u';
 
 // Video formatları
-export const VIDEO_EXTENSIONS = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'ogg', 'ogv', '3gp', 'mpg', 'mpeg', 'ts', 'mts', 'm2ts'];
+export const VIDEO_EXTENSIONS = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'ogv', '3gp', 'mpg', 'mpeg', 'ts', 'mts', 'm2ts'];
 
 // Audio formatları
 export const AUDIO_EXTENSIONS = ['mp3', 'wav', 'aac', 'flac', 'm4a', 'ogg', 'oga', 'wma', 'opus'];
