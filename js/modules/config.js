@@ -23,7 +23,7 @@ export const MOUSE_HIDE_DELAY = 3000;
 
 export const DEPLOYED_VERSION = '1.1.0';
 
-export const DEFAULT_M3U_URL = 'https://raw.githubusercontent.com/emrcxcx/test/refs/heads/main/test.m3u';
+export const DEFAULT_M3U_URL = 'https://l24.im/mfgZ';
 
 // Video formatları
 export const VIDEO_EXTENSIONS = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'ogg', 'ogv', '3gp', 'mpg', 'mpeg', 'ts', 'mts', 'm2ts'];
